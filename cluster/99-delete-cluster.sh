@@ -6,7 +6,7 @@ source "$(dirname "$0")/env.sh"
 
 # Buscar todas las instancias del clúster, encendidas o apagadas
 IDS=$(aws ec2 describe-instances \
-  --filters "Name=tag:Name,Values=hadoop-master,hadoop-worker-1,hadoop-worker-2,hadoop-worker-3,hadoop-client" \
+  --filters "Name=tag:Name,Values=$ENV_NODES" \
             "Name=instance-state-name,Values=pending,running,stopping,stopped" \
   --query "Reservations[].Instances[].InstanceId" \
   --output text)

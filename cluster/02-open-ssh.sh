@@ -6,7 +6,7 @@ source "$(dirname "$0")/env.sh"
 
 # Abrir el puerto 22 a todo internet en el grupo del master y el client
 aws ec2 authorize-security-group-ingress \
-  --group-name hadoop-master-sg \
+  --group-name "$ENV_SG_MASTER" \
   --protocol tcp \
   --port 22 \
   --cidr 0.0.0.0/0 \
@@ -14,10 +14,10 @@ aws ec2 authorize-security-group-ingress \
 
 # Mostrar las IPs que pueden entrar por SSH
 aws ec2 describe-security-groups \
-  --group-names hadoop-master-sg \
+  --group-names "$ENV_SG_MASTER" \
   --query "SecurityGroups[0].IpPermissions[].IpRanges[].CidrIp" \
   --output text
 
-echo "Esperado: aparece 0.0.0.0/0"
 echo
-echo "Siguiente: ./cluster/03-create-client.sh"
+echo "Siguiente: comprobar HDFS y YARN en sus webs (README, paso 3; túneles con ./cluster/ssh-commands.sh)"
+echo "Después: ./cluster/04-create-client.sh"

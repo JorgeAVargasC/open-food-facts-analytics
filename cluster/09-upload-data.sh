@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Paso 8 (master): descarga el CSV de Open Food Facts, lo sube a HDFS y crea una muestra de 100.000 filas.
-# Uso: nohup ./cluster/08-upload-data.sh > upload.log 2>&1 &    y para ver el avance: tail -f upload.log
+# Paso 9 (master): descarga el CSV de Open Food Facts, lo sube a HDFS y crea una muestra de 100.000 filas.
+# Uso: nohup ./cluster/09-upload-data.sh > upload.log 2>&1 &    y para ver el avance: tail -f upload.log
 set -euo pipefail
 export JAVA_HOME=/usr/lib/jvm/java
 HDFS=~/hadoop-3.3.6/bin/hdfs

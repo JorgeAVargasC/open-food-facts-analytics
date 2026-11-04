@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Paso 6 (master): sustituye el yarn-site.xml de Ansible por el nuestro (6 GB por worker) y reinicia YARN.
-# Uso: ./cluster/06-apply-config.sh
+# Paso 7 (master): sustituye el yarn-site.xml de Ansible por el nuestro (6 GB por worker) y reinicia YARN.
+# Uso: ./cluster/07-apply-config.sh
 set -euo pipefail
 cd "$(dirname "$0")"
 CONF=hadoop-3.3.6/etc/hadoop
@@ -23,4 +23,4 @@ sleep 30
 bash check-cluster.sh
 
 echo
-echo "Siguiente: ./cluster/07-setup-client.sh"
+echo "Siguiente: ./cluster/08-setup-client.sh"

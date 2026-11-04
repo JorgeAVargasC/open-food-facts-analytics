@@ -6,7 +6,7 @@ source "$(dirname "$0")/env.sh"
 
 # Buscar las instancias apagadas
 IDS=$(aws ec2 describe-instances \
-  --filters "Name=tag:Name,Values=hadoop-master,hadoop-worker-1,hadoop-worker-2,hadoop-worker-3,hadoop-client" \
+  --filters "Name=tag:Name,Values=$ENV_NODES" \
             "Name=instance-state-name,Values=stopped" \
   --query "Reservations[].Instances[].InstanceId" \
   --output text)
@@ -20,3 +20,7 @@ fi
 
 # Mostrar estado y DNS públicos
 bash "$(dirname "$0")/status.sh"
+
+# Mostrar los comandos ssh con el DNS nuevo
+echo
+bash "$(dirname "$0")/ssh-commands.sh"

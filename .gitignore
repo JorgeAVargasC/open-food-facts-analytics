@@ -9,4 +9,3 @@ data-version.txt
 upload.log
 local/
 !tests/sample-1k.csv
-cluster/client-ip.txt

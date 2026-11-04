@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Paso 5 (master): permite entrar a los nodos con "ssh hadoop-worker-1" y añade el client a /etc/hosts.
-# Uso: ./cluster/05-setup-master.sh
+# Paso 6 (master): permite entrar a los nodos con "ssh hadoop-worker-1" y añade el client a /etc/hosts.
+# Uso: ./cluster/06-setup-master.sh
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -13,6 +13,8 @@ chmod 600 ~/.ssh/config
 
 # Añadir el client al /etc/hosts del master con la IP de client-ip.txt
 if ! grep -q hadoop-client /etc/hosts; then
+  # El /etc/hosts de Ansible no acaba en salto de línea: añadirlo para no pegar el client a la última línea
+  [ -z "$(tail -c 1 /etc/hosts)" ] || echo | sudo tee -a /etc/hosts > /dev/null
   echo "$(cat client-ip.txt)  hadoop-client" | sudo tee -a /etc/hosts
 fi
 
@@ -27,4 +29,4 @@ done
 
 echo "Esperado: 4 líneas con ip-172-..."
 echo
-echo "Siguiente: ./cluster/06-apply-config.sh"
+echo "Siguiente: ./cluster/07-apply-config.sh"

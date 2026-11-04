@@ -9,6 +9,10 @@ if [ ! -f ~/.ssh/vockey.pem ]; then
   exit 1
 fi
 
+# Configurar aws en ~/.aws/config: región del Learner Lab y salida directa, sin abrir un paginador
+aws configure set region us-east-1
+aws configure set cli_pager ""
+
 # Entorno de Ansible con el playbook
 python3 -m venv ~/ansible
 source ~/ansible/bin/activate
@@ -16,5 +20,4 @@ source ~/ansible/bin/activate
 pip install -r ~/hadoop-ansible-ec2/requirements.txt
 
 echo
-echo "Falta: pegar las credenciales del Learner Lab en ~/.aws/credentials"
 echo "Siguiente: ./cluster/01-create-cluster.sh"

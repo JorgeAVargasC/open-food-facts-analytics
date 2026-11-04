@@ -5,8 +5,9 @@ Preguntas analíticas con Spark sobre el CSV de Open Food Facts, en un clúster 
 ## Requisitos
 
 - Windows: **WSL** (Ubuntu). Mac: **Terminal**.
-- `git` y `python3` (en Mac vienen con `xcode-select --install`). En Mac, también [Homebrew](https://brew.sh).
-- Learner Lab arrancado y `labsuser.pem` descargado (AWS Details, Download PEM).
+- `git` y `python3`.
+- Learner Lab arrancado
+- `labsuser.pem` descargado (AWS Details, Download PEM).
 - Scripts ejecutables. Si al lanzar uno sale `Permission denied`: `chmod +x cluster/*.sh tests/*.sh run.sh`.
 
 Las capturas van en `docs/assets/` con el nombre que indica cada paso.
@@ -26,20 +27,7 @@ sudo apt update
 sudo apt install -y git python3-venv libffi-dev unzip
 ```
 
-Instalar AWS CLI (instalador oficial de AWS):
-
-```bash
-# WSL
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
-unzip -q awscliv2.zip
-sudo ./aws/install
-rm -rf awscliv2.zip aws
-```
-
-```bash
-# Mac
-brew install awscli
-```
+Instalar AWS CLI siguiendo las [instrucciones oficiales de AWS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions).
 
 Comprobar:
 
@@ -55,12 +43,6 @@ cp ~/Downloads/labsuser.pem ~/.ssh/vockey.pem
 chmod og-rwx ~/.ssh/vockey.pem
 ```
 
-Instalar Ansible y clonar el playbook:
-
-```bash
-./cluster/00-prepare-local.sh
-```
-
 > [!WARNING]
 > Pegar las credenciales de AWS (Learner Lab, AWS Details, AWS CLI, Show).
 > Caducan con cada sesión del lab: repetir este bloque cada vez que arranques el Learner Lab.
@@ -70,13 +52,11 @@ mkdir -p ~/.aws
 nano ~/.aws/credentials        # pegar, guardar con Ctrl+O y Enter, salir con Ctrl+X
 ```
 
-Comprobar que AWS responde sin error:
+Instalar Ansible y clonar el playbook:
 
 ```bash
-aws ec2 describe-instances --region us-east-1
+./cluster/00-prepare-local.sh
 ```
-
-![Paso 0: aws cli responde](docs/assets/step-00-aws-cli.png)
 
 ### 1. Crear master y 3 workers con Ansible (~10 min)
 
@@ -107,99 +87,120 @@ Comprobar en AWS: EC2, Security Groups, `hadoop-master-sg`, Inbound rules: SSH, 
 
 ![Paso 2: regla SSH abierta](docs/assets/step-02-ssh-rule.png)
 
-### 3. Crear el client
+### 3. Comprobar HDFS y YARN tal como los deja Ansible
+
+En tu equipo, ver los comandos ssh:
+
+```bash
+./cluster/ssh-commands.sh
+```
+
+Abrir el túnel de HDFS en una terminal y el de YARN en otra, y dejar las dos abiertas.
+
+HDFS: abrir http://localhost:50070. En Overview, `Live Nodes` es `3`. En la pestaña Datanodes salen `hadoop-worker-1`, `hadoop-worker-2` y `hadoop-worker-3` en `In Service`.
+
+![Paso 3: DataNodes en la web de HDFS](docs/assets/step-03-hdfs-datanodes.png)
+
+YARN: abrir http://localhost:8088/cluster/nodes. Salen los 3 workers en `RUNNING`.
+
+![Paso 3: nodos en la web de YARN](docs/assets/step-03-yarn-nodes.png)
+
+> [!WARNING]
+> Si salen 0 nodos, el playbook no terminó. Puede cortarse en `Download Spark` del master por su límite de 60 s, y entonces nunca configura los workers. Repetirlo solo desde los workers, en tu equipo:
+>
+> ```bash
+> source ~/ansible/bin/activate
+> cd ~/hadoop-ansible-ec2
+> ansible-playbook -i inventory.aws_ec2.yml --key-file ~/.ssh/vockey.pem --user ec2-user \
+>   create-instances.yml --start-at-task "copy hdfs-site.xml file to hadoop-worker nodes"
+> ```
+
+### 4. Crear el client
 
 En tu equipo:
 
 ```bash
-./cluster/03-create-client.sh
+./cluster/04-create-client.sh
 ```
 
 Comprobar en AWS: EC2, Instances: `hadoop-client` en `Running` con `2/2 checks passed`.
 
-![Paso 3: instancia del client](docs/assets/step-03-client-instance.png)
+![Paso 4: instancia del client](docs/assets/step-04-client-instance.png)
 
-### 4. Copiar el proyecto al master
+### 5. Copiar el proyecto al master
 
 En tu equipo:
 
 ```bash
-./cluster/04-copy-to-master.sh
+./cluster/05-copy-to-master.sh
 ```
 
-Al final muestra el comando para entrar al master. Entrar y ir al proyecto:
+Al final muestra los comandos ssh, igual que `./cluster/ssh-commands.sh`. Entrar al master con el de `Master` e ir al proyecto:
 
 ```bash
-ssh -i ~/.ssh/vockey.pem ec2-user@<DNS-DEL-MASTER>
 cd open-food-facts-analytics
 ```
 
 Comprobar en la terminal: `ls` muestra `cluster`, `jobs`, `run.sh`...
 
-![Paso 4: proyecto en el master](docs/assets/step-04-project-on-master.png)
+![Paso 5: proyecto en el master](docs/assets/step-05-project-on-master.png)
 
-### 5. SSH entre nodos y /etc/hosts
+### 6. SSH entre nodos y /etc/hosts
 
 En el master:
 
 ```bash
-./cluster/05-setup-master.sh
+./cluster/06-setup-master.sh
 ```
 
 Comprobar en la terminal: 4 líneas `hadoop-worker-1: ip-172-...` (una por nodo).
 
-![Paso 5: el master entra en todos los nodos](docs/assets/step-05-ssh-nodes.png)
+![Paso 6: el master entra en todos los nodos](docs/assets/step-06-ssh-nodes.png)
 
-### 6. Configuración de YARN (6 GB por worker)
+### 7. Configuración de YARN (6 GB por worker)
 
-En el master:
+Con el túnel de YARN del paso 3 abierto (si se cerró, el comando lo da `./cluster/ssh-commands.sh`).
 
-```bash
-./cluster/06-apply-config.sh
-```
+**Antes**, con la configuración de Ansible: abrir http://localhost:8088/cluster/nodes. Salen 3 nodos `RUNNING` con los valores por defecto de YARN, `8 GB` y `8` vCores cada uno, más de lo que tiene una t3.large (8 GB y 2 núcleos). En http://localhost:8088/cluster, Total Resources `<memory:24 GB, vCores:24>`.
 
-Comprobar en la web de YARN. En otra terminal de tu equipo abrir el túnel y dejarla abierta:
-
-```bash
-ssh -i ~/.ssh/vockey.pem -N -L 8088:<DNS-DEL-MASTER>:8088 ec2-user@<DNS-DEL-MASTER>
-```
-
-Abrir http://localhost:8088/cluster/nodes: 3 nodos `RUNNING`, cada uno con `6 GB` de memoria. En http://localhost:8088/cluster, Total Resources `<memory:18 GB, vCores:6>`.
-
-![Paso 6: nodos de YARN con 6 GB](docs/assets/step-06-yarn-nodes.png)
-
-### 7. Spark en el client
+![Paso 7: nodos de YARN antes, con la configuración de Ansible](docs/assets/step-07-yarn-nodes-before.png)
 
 En el master:
 
 ```bash
-./cluster/07-setup-client.sh
+./cluster/07-apply-config.sh
+```
+
+**Después**: recargar http://localhost:8088/cluster/nodes. Salen 3 nodos `RUNNING` con `6 GB` y `2` vCores cada uno. En http://localhost:8088/cluster, Total Resources `<memory:18 GB, vCores:6>`.
+
+![Paso 7: nodos de YARN después, con 6 GB](docs/assets/step-07-yarn-nodes-after.png)
+
+### 8. Spark en el client
+
+En el master:
+
+```bash
+./cluster/08-setup-client.sh
 ```
 
 Comprobar en la terminal: `Pi is roughly 3.14`. En la web de YARN (http://localhost:8088/cluster/apps): la aplicación `PythonPi` en `FINISHED`.
 
-![Paso 7: SparkPi terminado en YARN](docs/assets/step-07-sparkpi.png)
+![Paso 8: SparkPi terminado en YARN](docs/assets/step-08-sparkpi.png)
 
-### 8. Subir el CSV a HDFS (~15 min)
+### 9. Subir el CSV a HDFS (~15 min)
 
 En el master:
 
 ```bash
-nohup ./cluster/08-upload-data.sh > upload.log 2>&1 &
+nohup ./cluster/09-upload-data.sh > upload.log 2>&1 &
 tail -f upload.log            # Ctrl+C deja de mirar, el script sigue
 ```
 
-Comprobar en la web de HDFS. En otra terminal de tu equipo:
+Comprobar en la web de HDFS, con el túnel de HDFS del paso 3 abierto (si se cerró, el comando lo da `./cluster/ssh-commands.sh`). Abrir http://localhost:50070, Utilities, Browse the file system, `/data/raw`: `openfoodfacts.csv` (~13 GB) y `muestra.csv`.
 
-```bash
-ssh -i ~/.ssh/vockey.pem -N -L 50070:<DNS-DEL-MASTER>:50070 ec2-user@<DNS-DEL-MASTER>
-```
+![Paso 9: CSV en HDFS](docs/assets/step-09-hdfs-raw.png)
 
-Abrir http://localhost:50070, Utilities, Browse the file system, `/data/raw`: `openfoodfacts.csv` (~13 GB) y `muestra.csv`.
-
-![Paso 8: CSV en HDFS](docs/assets/step-08-hdfs-raw.png)
-
-### 9. Limpiar los datos
+### 10. Limpiar los datos
 
 Entrar al client desde el master:
 
@@ -217,9 +218,9 @@ En el client, primero con la muestra y después con el CSV completo:
 
 Comprobar en la terminal: `Filas del CSV` (~4,88 millones con el completo) y la tabla de cuántos productos tienen cada dato. En la web de HDFS: carpeta `/data/clean/products`.
 
-![Paso 9: resultado del ETL](docs/assets/step-09-etl.png)
+![Paso 10: resultado del ETL](docs/assets/step-10-etl.png)
 
-### 10. Las preguntas
+### 11. Las preguntas
 
 En el client:
 
@@ -229,14 +230,14 @@ for f in jobs/q*.py; do ./run.sh "$f"; done
 
 Comprobar en la terminal: un `OK qNN-...` por pregunta. En la web de HDFS: una carpeta por pregunta en `/results`.
 
-![Paso 10: resultados en HDFS](docs/assets/step-10-results.png)
+![Paso 11: resultados en HDFS](docs/assets/step-11-results.png)
 
 ---
 
 ## Cada sesión
 
 ```bash
-./cluster/start.sh          # tu equipo: encender (muestra el DNS del master, cambia cada vez)
+./cluster/start.sh          # tu equipo: encender (muestra los comandos ssh, el DNS cambia cada vez)
 ./cluster/check-cluster.sh  # master: comprobar que todo está arrancado
 ./cluster/stop.sh           # tu equipo: apagar al terminar
 ```

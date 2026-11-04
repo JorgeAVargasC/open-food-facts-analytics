@@ -1,26 +1,22 @@
 #!/usr/bin/env bash
 # Variables comunes de los scripts que se ejecutan en tu equipo (WSL o Mac). Se carga con source, no se ejecuta solo.
 
-# Activar el entorno de Ansible
-source ~/ansible/bin/activate
+# Nombres de las instancias (tag Name en EC2)
+ENV_MASTER="hadoop-master"
+ENV_WORKER_1="hadoop-worker-1"
+ENV_WORKER_2="hadoop-worker-2"
+ENV_WORKER_3="hadoop-worker-3"
+ENV_CLIENT="hadoop-client"
 
-# Que aws escriba la salida directamente, sin abrir un paginador
-export AWS_PAGER=""
+# Todas las instancias del clúster, separadas por comas (formato del filtro de aws)
+ENV_NODES="$ENV_MASTER,$ENV_WORKER_1,$ENV_WORKER_2,$ENV_WORKER_3,$ENV_CLIENT"
 
-# Región del Learner Lab
-export AWS_DEFAULT_REGION=us-east-1
+# Grupos de seguridad que crea el playbook: el común a todos los nodos y el del master (con SSH abierto)
+ENV_SG_CLUSTER="hadoop-sg"
+ENV_SG_MASTER="hadoop-master-sg"
 
 # Clave para entrar en las instancias
-KEY=~/.ssh/vockey.pem
+ENV_KEY=~/.ssh/vockey.pem
 
 # Opciones de ssh/scp: usar la clave y no preguntar por la huella del servidor
-SSH_OPTS="-i $KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR"
-
-# Dato de una instancia encendida por su nombre. Ejemplo: instance_info hadoop-master PublicDnsName
-instance_info() {
-  aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=$1" \
-              "Name=instance-state-name,Values=running" \
-    --query "Reservations[0].Instances[0].$2" \
-    --output text
-}
+ENV_SSH_OPTS="-i $ENV_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR"

@@ -317,9 +317,3 @@ Comprobar en la terminal: un `OK qNN-...` por pregunta. En la web de HDFS: una c
 ./tests/setup-local-test.sh   # una vez: Java + PySpark
 ./tests/local-test.sh         # ETL + preguntas + gráficas con tests/sample-1k.csv
 ```
-
-## Borrar todo al final
-
-```bash
-./cluster/99-delete-cluster.sh
-```

@@ -3,6 +3,7 @@
 Uso: ./run.sh jobs/00-etl.py hdfs:///data/raw/muestra.csv   (muestra)
      ./run.sh jobs/00-etl.py                                 (CSV completo)
 """
+
 import sys
 
 from pyspark.sql import SparkSession
@@ -37,29 +38,34 @@ category = F.when(~category.isin("undefined", "null"), category)
 
 # Estado vegano: 'vegan', 'non-vegan' o nulo si no se sabe
 analysis = F.split("ingredients_analysis_tags", ",")
-vegan_status = (F.when(F.array_contains(analysis, "en:non-vegan"), "non-vegan")
-                 .when(F.array_contains(analysis, "en:vegan"), "vegan"))
+vegan_status = F.when(F.array_contains(analysis, "en:non-vegan"), "non-vegan").when(
+    F.array_contains(analysis, "en:vegan"), "vegan"
+)
 
 
 # Elegir y limpiar las columnas
 clean = raw.select(
     F.col("code"),
     F.col("product_name"),
-    tag_list("brands_tags")[0].alias("brand"),                               # primera marca
+    tag_list("brands_tags")[0].alias("brand"),  # primera marca
     category.alias("category"),
-    F.array_remove(tag_list("countries_tags"), "world").alias("countries"),  # 'world' no es un país
-    F.year(F.from_unixtime("created_t")).alias("created_year"),              # fecha Unix a año
-    F.when(F.col("nutriscore_grade").isin("a", "b", "c", "d", "e"),          # 'unknown' a nulo
-           F.col("nutriscore_grade")).alias("nutriscore_grade"),
+    F.array_remove(tag_list("countries_tags"), "world").alias(
+        "countries"
+    ),  # 'world' no es un país
+    F.year(F.from_unixtime("created_t")).alias("created_year"),  # fecha Unix a año
+    F.when(
+        F.col("nutriscore_grade").isin("a", "b", "c", "d", "e"),  # 'unknown' a nulo
+        F.col("nutriscore_grade"),
+    ).alias("nutriscore_grade"),
     F.col("nutriscore_score").cast("int").alias("nutriscore_score"),
-    F.col("nova_group").cast("int").alias("nova_group"),                     # de 1 a 4
+    F.col("nova_group").cast("int").alias("nova_group"),  # de 1 a 4
     grams("sugars_100g").alias("sugars_100g"),
     grams("salt_100g").alias("salt_100g"),
     grams("proteins_100g").alias("proteins_100g"),
     tag_list("additives_tags").alias("additives"),
     tag_list("allergens").alias("allergens"),
     vegan_status.alias("vegan_status"),
-    F.col("completeness").cast("double").alias("completeness"),              # de 0 a 1
+    F.col("completeness").cast("double").alias("completeness"),  # de 0 a 1
 )
 
 # Quitar filas sin código de barras y productos repetidos

@@ -245,10 +245,14 @@ En el master:
 
 ```bash
 nohup ./cluster/09-upload-data.sh > upload.log 2>&1 &
-tail -f upload.log            # Ctrl+C deja de mirar, el script sigue
+tail -f --pid=$! upload.log   # se cierra solo al terminar el script; Ctrl+C deja de mirar, el script sigue
 ```
 
+`--pid=$!` hace que `tail` termine cuando acaba el script (`$!` es el proceso que se acaba de lanzar con `&`). Si se corta el SSH, el script sigue: al volver a entrar, `tail upload.log` muestra cómo va, y la última línea `Esperado: ...` indica que ha terminado.
+
 Comprobar en la web de HDFS, con el túnel de HDFS del paso 3 abierto (si se cerró, el comando lo da `./cluster/ssh-commands.sh`). Abrir http://localhost:50070, Utilities, Browse the file system, `/data/raw`: `openfoodfacts.csv` (~13 GB) y `muestra.csv`.
+
+Al final del log, `hdfs dfs -du -h` muestra dos columnas: el tamaño del fichero (~13 G) y lo que ocupa en disco contando las réplicas (~39 G). El playbook de Ansible no cambia `dfs.replication`, así que se queda el valor por defecto de Hadoop, 3: cada bloque se guarda una vez en cada uno de los 3 workers. Para comprobarlo: `~/hadoop-3.3.6/bin/hdfs dfs -stat %r /data/raw/openfoodfacts.csv` (da `3`).
 
 ![Paso 9: CSV en HDFS](docs/assets/step-09-hdfs-raw.png)
 
@@ -261,16 +265,29 @@ ssh hadoop-client
 cd open-food-facts-analytics
 ```
 
-En el client, primero con la muestra y después con el CSV completo:
+#### Con la muestra
+
+Primero con la muestra, para comprobar en poco tiempo que el ETL funciona:
 
 ```bash
 ./run.sh jobs/00-etl.py hdfs:///data/raw/muestra.csv
+```
+
+Comprobar en la terminal: `Filas del CSV` (~99.000, el 2 % del total), la tabla de cuántos productos tienen cada dato y `OK 00-etl` al final.
+
+![Paso 10: ETL con la muestra](docs/assets/step-10-etl-sample.png)
+
+#### Con el CSV completo
+
+Después con el CSV completo (sin argumento usa `/data/raw/openfoodfacts.csv`). Sobrescribe la salida de la muestra:
+
+```bash
 ./run.sh jobs/00-etl.py
 ```
 
-Comprobar en la terminal: `Filas del CSV` (~4,88 millones con el completo) y la tabla de cuántos productos tienen cada dato. En la web de HDFS: carpeta `/data/clean/products`.
+Comprobar en la terminal: `Filas del CSV` (~4,88 millones), la tabla de cuántos productos tienen cada dato y `OK 00-etl`. En la web de HDFS: carpeta `/data/clean/products`.
 
-![Paso 10: resultado del ETL](docs/assets/step-10-etl.png)
+![Paso 10: ETL con el CSV completo](docs/assets/step-10-etl-full.png)
 
 ### 11. Las preguntas
 

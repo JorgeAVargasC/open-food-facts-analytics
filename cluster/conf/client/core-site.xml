@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- core-site.xml del client (manual de Mauro): dirección de HDFS. Lo copia el paso 7 a ~/hadoop_conf. -->
+<!-- core-site.xml del client: dirección de HDFS. -->
 <configuration>
   <property>
     <name>fs.defaultFS</name>

@@ -33,7 +33,7 @@ CLIENT_ID=$(aws ec2 run-instances \
 echo "Creado $CLIENT_ID. Esperando a que esté listo..."
 aws ec2 wait instance-status-ok --instance-ids "$CLIENT_ID"
 
-# Guardar su IP privada para añadirla a /etc/hosts en el paso 5
+# Guardar su IP privada en client-ip.txt
 instance_info hadoop-client PrivateIpAddress > client-ip.txt
 echo "IP privada del client: $(cat client-ip.txt)"
 

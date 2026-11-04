@@ -3,7 +3,7 @@
 # Uso: ./cluster/00-prepare-local.sh
 set -euo pipefail
 
-# Comprobar que la clave ya está donde la espera el playbook (ver README, paso 0)
+# Comprobar que la clave ya está donde la espera el playbook
 if [ ! -f ~/.ssh/vockey.pem ]; then
   echo "Falta ~/.ssh/vockey.pem: cp ~/Downloads/labsuser.pem ~/.ssh/vockey.pem && chmod og-rwx ~/.ssh/vockey.pem"
   exit 1

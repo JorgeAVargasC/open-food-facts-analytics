@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Local: ejecuta el ETL, las preguntas y las gráficas en tu equipo con pocos datos, sin clúster. WSL y Mac.
-# Requisito (una vez): ./tests/setup-local-test.sh
+# Requisito: Java 17 y el entorno ~/off-venv con pyspark, pandas y seaborn
 # Uso: ./tests/local-test.sh               (con tests/sample-1k.csv)
 #      ./tests/local-test.sh muestra.csv   (con otra muestra)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 L="$PWD/local"
 
-# Activar el entorno de Python que crea setup-local-test.sh
+# Activar el entorno de Python ~/off-venv
 source ~/off-venv/bin/activate
 
 # En Mac, decir a Spark dónde está el Java de Homebrew

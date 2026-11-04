@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Variables comunes de los scripts que se ejecutan en tu equipo (WSL o Mac). Se carga con source, no se ejecuta solo.
 
-# Activar el entorno con aws y ansible (lo crea el paso 0)
+# Activar el entorno con aws y ansible
 source ~/ansible/bin/activate
 
 # Región del Learner Lab

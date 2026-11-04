@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- yarn-site.xml del master. Igual que el de Ansible más el máximo por contenedor. Lo copia el paso 6. -->
+<!-- yarn-site.xml del master. Igual que el de Ansible más el máximo por contenedor. -->
 <configuration>
 
   <!-- Nodo donde corre el ResourceManager -->

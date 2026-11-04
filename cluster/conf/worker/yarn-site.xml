@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- yarn-site.xml de los workers. Igual que el de Ansible más memoria y control de memoria virtual. Lo copia el paso 6. -->
+<!-- yarn-site.xml de los workers. Igual que el de Ansible más memoria y control de memoria virtual. -->
 <configuration>
 
   <!-- ResourceManager al que se conecta este worker -->

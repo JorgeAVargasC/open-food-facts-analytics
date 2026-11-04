@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- yarn-site.xml del client (manual de Mauro): dirección del ResourceManager. Lo copia el paso 7 a ~/hadoop_conf. -->
+<!-- yarn-site.xml del client: dirección del ResourceManager. -->
 <configuration>
 
   <!-- Nodo donde corre el ResourceManager -->

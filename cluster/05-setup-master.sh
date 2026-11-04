@@ -11,7 +11,7 @@ chmod 600 ~/.ssh/vockey.pem
 cp ssh-config ~/.ssh/config
 chmod 600 ~/.ssh/config
 
-# Añadir el client al /etc/hosts del master, con la IP que guardó el paso 3
+# Añadir el client al /etc/hosts del master con la IP de client-ip.txt
 if ! grep -q hadoop-client /etc/hosts; then
   echo "$(cat client-ip.txt)  hadoop-client" | sudo tee -a /etc/hosts
 fi

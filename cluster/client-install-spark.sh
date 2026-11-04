@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Client: instala Java 8 y Spark y lo configura para usar YARN y HDFS (manual de Mauro). Lo lanza el paso 7.
+# Client: instala Java 8 y Spark y lo configura para usar YARN y HDFS.
 set -euo pipefail
 cd "$(dirname "$0")"
 V=3.5.3

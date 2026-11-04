@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Paso 1 (local): crea hadoop-master y 3 workers con Hadoop, HDFS, YARN y Spark usando el playbook de clase.
+# Paso 1 (local): crea hadoop-master y 3 workers con Hadoop, HDFS, YARN y Spark usando Ansible.
 # Uso: ./cluster/01-create-cluster.sh
 set -euo pipefail
 source "$(dirname "$0")/env.sh"

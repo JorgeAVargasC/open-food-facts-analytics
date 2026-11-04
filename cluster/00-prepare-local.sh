@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Paso 0 (local, una sola vez): crea el entorno de Ansible, clona el playbook e instala AWS CLI.
+# Paso 0 (local, una sola vez): crea el entorno de Ansible y clona el playbook.
 # Uso: ./cluster/00-prepare-local.sh
 set -euo pipefail
 
@@ -9,14 +9,11 @@ if [ ! -f ~/.ssh/vockey.pem ]; then
   exit 1
 fi
 
-# Entorno de Ansible con el playbook de clase
+# Entorno de Ansible con el playbook
 python3 -m venv ~/ansible
 source ~/ansible/bin/activate
 [ -d ~/hadoop-ansible-ec2 ] || git clone https://github.com/memaldi/hadoop-ansible-ec2 ~/hadoop-ansible-ec2
 pip install -r ~/hadoop-ansible-ec2/requirements.txt
-
-# AWS CLI para nuestros scripts (versión compatible con el playbook)
-pip install awscli==1.29.36
 
 echo
 echo "Falta: pegar las credenciales del Learner Lab en ~/.aws/credentials"

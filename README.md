@@ -5,7 +5,7 @@ Preguntas analíticas con Spark sobre el CSV de Open Food Facts, en un clúster 
 ## Requisitos
 
 - Windows: **WSL** (Ubuntu). Mac: **Terminal**.
-- `git` y `python3` (en Mac vienen con `xcode-select --install`).
+- `git` y `python3` (en Mac vienen con `xcode-select --install`). En Mac, también [Homebrew](https://brew.sh).
 - Learner Lab arrancado y `labsuser.pem` descargado (AWS Details, Download PEM).
 - Scripts ejecutables. Si al lanzar uno sale `Permission denied`: `chmod +x cluster/*.sh tests/*.sh run.sh`.
 
@@ -23,7 +23,28 @@ Dependencias (en Mac no hace falta: git y python3 vienen con `xcode-select --ins
 
 ```bash
 sudo apt update
-sudo apt install -y git python3-venv libffi-dev
+sudo apt install -y git python3-venv libffi-dev unzip
+```
+
+Instalar AWS CLI (instalador oficial de AWS):
+
+```bash
+# WSL
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+unzip -q awscliv2.zip
+sudo ./aws/install
+rm -rf awscliv2.zip aws
+```
+
+```bash
+# Mac
+brew install awscli
+```
+
+Comprobar:
+
+```bash
+aws --version
 ```
 
 Copiar la clave donde la espera el playbook (Learner Lab la da como `labsuser.pem`):
@@ -34,7 +55,7 @@ cp ~/Downloads/labsuser.pem ~/.ssh/vockey.pem
 chmod og-rwx ~/.ssh/vockey.pem
 ```
 
-Instalar Ansible, AWS CLI y clonar el playbook:
+Instalar Ansible y clonar el playbook:
 
 ```bash
 ./cluster/00-prepare-local.sh
@@ -52,7 +73,6 @@ nano ~/.aws/credentials        # pegar, guardar con Ctrl+O y Enter, salir con Ct
 Comprobar que AWS responde sin error:
 
 ```bash
-source ~/ansible/bin/activate
 aws ec2 describe-instances --region us-east-1
 ```
 

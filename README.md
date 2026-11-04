@@ -66,6 +66,35 @@ En tu equipo:
 ./cluster/01-create-cluster.sh
 ```
 
+> [!TIP]
+> `Download Spark` tarda 10-35 min sin mostrar progreso. Para verlo, en otra terminal de tu equipo sacar el comando ssh del master:
+>
+> ```bash
+> ./cluster/ssh-commands.sh
+> ```
+>
+> Conectarse al master con el primer comando que imprime (`ssh -i ... ec2-user@...`) y ejecutar:
+>
+> ```bash
+> watch -n 5 'ls -lh ~/.ansible/tmp/*/'   # el archivo tmp... debe crecer
+> ```
+>
+> ![Paso 1: descarga de Spark en curso](docs/assets/step-01-download-spark.png)
+>
+> Al terminar, el `tmp...` desaparece y queda `~/spark-3.5.5-bin-hadoop3.tgz` (383 MB) en el master.
+
+> [!WARNING]
+> Si el `.tgz` ya está en el master pero Ansible sigue parado en `Download Spark`, se cortó la conexión SSH (la descarga larga la deja inactiva). Los workers aún no están configurados. Cortar con Ctrl+C y seguir desde la tarea siguiente, en tu equipo:
+>
+> ```bash
+> source ~/ansible/bin/activate
+> cd ~/hadoop-ansible-ec2
+> ansible-playbook -i inventory.aws_ec2.yml --key-file ~/.ssh/vockey.pem --user ec2-user \
+>   create-instances.yml --start-at-task "Extract Spark"
+> ```
+>
+> Esperar al `PLAY RECAP` con `failed=0` en las 4 máquinas.
+
 Comprobar en AWS:
 
 - EC2, Instances: `hadoop-master`, `hadoop-worker-1`, `hadoop-worker-2`, `hadoop-worker-3` en `Running`.
@@ -75,9 +104,9 @@ Comprobar en AWS:
 
 ![Paso 1: grupos de seguridad](docs/assets/step-01-security-groups.png)
 
-### 2. Abrir el SSH a cualquier IP
+### 2. Abrir el SSH del security group a cualquier IP
 
-En tu equipo:
+Ansible solo deja entrar por SSH desde tu IP inicial. Este paso añade al security group `hadoop-master-sg` (el del master y el client) una regla que abre el puerto 22 a cualquier IP. En tu equipo:
 
 ```bash
 ./cluster/02-open-ssh.sh
@@ -104,6 +133,21 @@ HDFS: abrir http://localhost:50070. En Overview, `Live Nodes` es `3`. En la pest
 YARN: abrir http://localhost:8088/cluster/nodes. Salen los 3 workers en `RUNNING`.
 
 ![Paso 3: nodos en la web de YARN](docs/assets/step-03-yarn-nodes.png)
+
+También por comando, en el master:
+
+```bash
+source ~/.bashrc
+hdfs dfsadmin -report | grep "Live datanodes"   # Live datanodes (3)
+```
+
+![Paso 3: DataNodes por comando](docs/assets/step-03-hdfs-command.png)
+
+```bash
+yarn node -list                                  # Total Nodes:3
+```
+
+![Paso 3: nodos de YARN por comando](docs/assets/step-03-yarn-command.png)
 
 > [!WARNING]
 > Si salen 0 nodos, el playbook no terminó. Puede cortarse en `Download Spark` del master por su límite de 60 s, y entonces nunca configura los workers. Repetirlo solo desde los workers, en tu equipo:
@@ -182,6 +226,14 @@ En el master:
 ```bash
 ./cluster/08-setup-client.sh
 ```
+
+Lo que más tarda es la descarga de Spark (383 MB), que no muestra progreso. Para seguirla, en otra terminal del master (se actualiza cada 5 s, salir con Ctrl+C):
+
+```bash
+ssh -t hadoop-client "watch -n 5 ls -lh /tmp/spark-3.5.3-bin-hadoop3.tgz"
+```
+
+Ha terminado cuando el archivo llega a `383M` y su fecha cambia a `Sep 9 2024`.
 
 Comprobar en la terminal: `Pi is roughly 3.14`. En la web de YARN (http://localhost:8088/cluster/apps): la aplicación `PythonPi` en `FINISHED`.
 

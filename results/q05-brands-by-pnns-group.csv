@@ -1,0 +1,331 @@
+pnns_group,nutrient,kind,rank,brand,products,avg_100g
+Alcoholic beverages,salt_100g,best,1,ringnes as,22,0.0
+Alcoholic beverages,salt_100g,best,2,casino,31,0.0
+Alcoholic beverages,salt_100g,best,3,somersby,24,0.0
+Alcoholic beverages,salt_100g,best,4,carlsberg,33,0.006
+Alcoholic beverages,salt_100g,best,5,desperados,45,0.009
+Alcoholic beverages,salt_100g,worst,1,u,20,0.125
+Alcoholic beverages,salt_100g,worst,2,carrefour,22,0.124
+Alcoholic beverages,salt_100g,worst,3,leffe,45,0.079
+Alcoholic beverages,salt_100g,worst,4,steinburg,23,0.018
+Alcoholic beverages,salt_100g,worst,5,heineken,42,0.012
+Alcoholic beverages,saturated_fat_100g,best,1,kronenbourg,51,0.0
+Alcoholic beverages,saturated_fat_100g,best,2,1664,48,0.0
+Alcoholic beverages,saturated_fat_100g,best,3,desperados,45,0.0
+Alcoholic beverages,saturated_fat_100g,best,4,carlsberg,33,0.0
+Alcoholic beverages,saturated_fat_100g,best,5,ringnes as,22,0.0
+Alcoholic beverages,saturated_fat_100g,worst,1,u,20,0.922
+Alcoholic beverages,saturated_fat_100g,worst,2,carrefour,22,0.165
+Alcoholic beverages,saturated_fat_100g,worst,3,steinburg,23,0.012
+Alcoholic beverages,saturated_fat_100g,worst,4,grimbergen,40,0.005
+Alcoholic beverages,saturated_fat_100g,worst,5,heineken,42,0.005
+Alcoholic beverages,sugars_100g,best,1,kronenbourg,51,0.388
+Alcoholic beverages,sugars_100g,best,2,1664,48,0.553
+Alcoholic beverages,sugars_100g,best,3,grimbergen,40,0.582
+Alcoholic beverages,sugars_100g,best,4,heineken,42,0.627
+Alcoholic beverages,sugars_100g,best,5,carlsberg,33,0.656
+Alcoholic beverages,sugars_100g,worst,1,somersby,24,6.702
+Alcoholic beverages,sugars_100g,worst,2,u,20,5.807
+Alcoholic beverages,sugars_100g,worst,3,carrefour,22,4.962
+Alcoholic beverages,sugars_100g,worst,4,steinburg,23,2.739
+Alcoholic beverages,sugars_100g,worst,5,desperados,45,2.577
+Baby foods,salt_100g,best,1,continente,20,0.033
+Baby foods,salt_100g,best,2,little gustave,48,0.044
+Baby foods,salt_100g,best,3,hero,21,0.046
+Baby foods,salt_100g,best,4,hacendado,27,0.051
+Baby foods,salt_100g,best,5,les recoltes bio,36,0.052
+Baby foods,salt_100g,worst,1,guigoz,56,2.162
+Baby foods,salt_100g,worst,2,mellin,55,2.101
+Baby foods,salt_100g,worst,3,aptamil,79,1.553
+Baby foods,salt_100g,worst,4,candia,23,1.481
+Baby foods,salt_100g,worst,5,plasmon,110,1.426
+Baby foods,saturated_fat_100g,best,1,olvarit,29,0.188
+Baby foods,saturated_fat_100g,best,2,naturnes,50,0.21
+Baby foods,saturated_fat_100g,best,3,continente,20,0.22
+Baby foods,saturated_fat_100g,best,4,little gustave,48,0.231
+Baby foods,saturated_fat_100g,best,5,gerber,49,0.386
+Baby foods,saturated_fat_100g,worst,1,laboratoire gallia,29,7.648
+Baby foods,saturated_fat_100g,worst,2,gallia,53,6.632
+Baby foods,saturated_fat_100g,worst,3,bledilait,22,5.782
+Baby foods,saturated_fat_100g,worst,4,nutricia,27,3.835
+Baby foods,saturated_fat_100g,worst,5,lactel,28,2.45
+Baby foods,sugars_100g,best,1,blédichef,37,1.645
+Baby foods,sugars_100g,best,2,yooji,33,2.907
+Baby foods,sugars_100g,best,3,bio-village,21,3.333
+Baby foods,sugars_100g,best,4,auchan baby,26,4.231
+Baby foods,sugars_100g,best,5,naturnes,50,4.38
+Baby foods,sugars_100g,worst,1,laboratoire gallia,29,41.348
+Baby foods,sugars_100g,worst,2,gallia,53,35.394
+Baby foods,sugars_100g,worst,3,bledilait,22,32.391
+Baby foods,sugars_100g,worst,4,nutricia,27,17.972
+Baby foods,sugars_100g,worst,5,guigoz,56,17.573
+Beverages,salt_100g,best,1,zevia,50,0.0
+Beverages,salt_100g,best,2,lerum,39,0.0
+Beverages,salt_100g,best,3,lökki,32,0.0
+Beverages,salt_100g,best,4,morand,32,0.0
+Beverages,salt_100g,best,5,bibal,27,0.0
+Beverages,salt_100g,worst,1,oishi,25,3.052
+Beverages,salt_100g,worst,2,the-kroger-co,49,2.198
+Beverages,salt_100g,worst,3,vitamilk,38,2.196
+Beverages,salt_100g,worst,4,bay-valley-foods-llc,21,1.295
+Beverages,salt_100g,worst,5,vega,83,1.253
+Beverages,saturated_fat_100g,best,1,firehouse-subs,449,0.0
+Beverages,saturated_fat_100g,best,2,jersey-mike-s-subs,204,0.0
+Beverages,saturated_fat_100g,best,3,red bull,189,0.0
+Beverages,saturated_fat_100g,best,4,sprite,156,0.0
+Beverages,saturated_fat_100g,best,5,san benedetto,123,0.0
+Beverages,saturated_fat_100g,worst,1,ayam,20,17.625
+Beverages,saturated_fat_100g,worst,2,kara,29,15.773
+Beverages,saturated_fat_100g,worst,3,aroy-d,22,14.897
+Beverages,saturated_fat_100g,worst,4,thai kitchen,22,13.162
+Beverages,saturated_fat_100g,worst,5,chaokoh,25,11.508
+Beverages,sugars_100g,best,1,kusmi tea,68,0.0
+Beverages,sugars_100g,best,2,zevia,50,0.0
+Beverages,sugars_100g,best,3,celsius,41,0.0
+Beverages,sugars_100g,best,4,nocco,33,0.0
+Beverages,sugars_100g,best,5,bibal,27,0.0
+Beverages,sugars_100g,worst,1,giffard,39,77.608
+Beverages,sugars_100g,worst,2,monin,165,73.206
+Beverages,sugars_100g,worst,3,krüger,22,62.789
+Beverages,sugars_100g,worst,4,fruiss,80,61.183
+Beverages,sugars_100g,worst,5,la maison guiot,39,60.749
+Cereals and potatoes,salt_100g,best,1,societa-cooperativa-pastai-gragnanesi,26,0.0
+Cereals and potatoes,salt_100g,best,2,mueller-s,23,0.0
+Cereals and potatoes,salt_100g,best,3,verrigni,35,0.0
+Cereals and potatoes,salt_100g,best,4,tria,30,0.001
+Cereals and potatoes,salt_100g,best,5,tarall-oro,63,0.001
+Cereals and potatoes,salt_100g,worst,1,มาม่า,35,5.545
+Cereals and potatoes,salt_100g,worst,2,นิสชิน,20,5.473
+Cereals and potatoes,salt_100g,worst,3,waiwai,24,4.983
+Cereals and potatoes,salt_100g,worst,4,lucky-me,23,4.865
+Cereals and potatoes,salt_100g,worst,5,acecook,21,4.689
+Cereals and potatoes,saturated_fat_100g,best,1,skinner,30,0.0
+Cereals and potatoes,saturated_fat_100g,best,2,tria,30,0.0
+Cereals and potatoes,saturated_fat_100g,best,3,mueller-s,23,0.0
+Cereals and potatoes,saturated_fat_100g,best,4,country-kitchen,21,0.0
+Cereals and potatoes,saturated_fat_100g,best,5,iberia,29,0.009
+Cereals and potatoes,saturated_fat_100g,worst,1,marie,38,11.079
+Cereals and potatoes,saturated_fat_100g,worst,2,jif,51,10.055
+Cereals and potatoes,saturated_fat_100g,worst,3,skippy,81,9.988
+Cereals and potatoes,saturated_fat_100g,worst,4,lucky-me,23,9.098
+Cereals and potatoes,saturated_fat_100g,worst,5,meridian,37,9.005
+Cereals and potatoes,sugars_100g,best,1,riz du monde,31,0.088
+Cereals and potatoes,sugars_100g,best,2,ciemme,42,0.314
+Cereals and potatoes,sugars_100g,best,3,brillante,24,0.315
+Cereals and potatoes,sugars_100g,best,4,taureau ailé,87,0.325
+Cereals and potatoes,sugars_100g,best,5,tria,30,0.4
+Cereals and potatoes,sugars_100g,worst,1,mom-brands,82,38.765
+Cereals and potatoes,sugars_100g,worst,2,larabar,21,35.084
+Cereals and potatoes,sugars_100g,worst,3,malt-o-meal,60,31.975
+Cereals and potatoes,sugars_100g,worst,4,trésor,21,29.0
+Cereals and potatoes,sugars_100g,worst,5,post,179,26.653
+Composite foods,salt_100g,best,1,trevijano,22,0.252
+Composite foods,salt_100g,best,2,hipp,21,0.31
+Composite foods,salt_100g,best,3,jersey-mike-s-subs,942,0.339
+Composite foods,salt_100g,best,4,bol,20,0.35
+Composite foods,salt_100g,best,5,whataburger,128,0.355
+Composite foods,salt_100g,worst,1,lipton,24,13.499
+Composite foods,salt_100g,worst,2,podravka,29,5.71
+Composite foods,salt_100g,worst,3,bear-creek-country-kitchens,30,4.788
+Composite foods,salt_100g,worst,4,nissin,38,4.519
+Composite foods,salt_100g,worst,5,idahoan,25,4.215
+Composite foods,saturated_fat_100g,best,1,the-hain-celestial-group-inc,35,0.047
+Composite foods,saturated_fat_100g,best,2,imagine,52,0.149
+Composite foods,saturated_fat_100g,best,3,goya,24,0.177
+Composite foods,saturated_fat_100g,best,4,cascina-belvedere,27,0.196
+Composite foods,saturated_fat_100g,best,5,lundberg-family-farms,23,0.211
+Composite foods,saturated_fat_100g,worst,1,tgi-friday-s,32,10.313
+Composite foods,saturated_fat_100g,worst,2,o-charley-s,20,10.25
+Composite foods,saturated_fat_100g,worst,3,potbelly-sandwich-shop,208,9.692
+Composite foods,saturated_fat_100g,worst,4,longhorn-steakhouse,30,9.2
+Composite foods,saturated_fat_100g,worst,5,yard-house,34,8.853
+Composite foods,sugars_100g,best,1,jersey-mike-s-subs,942,0.551
+Composite foods,sugars_100g,best,2,swanson,28,0.564
+Composite foods,sugars_100g,best,3,del-taco,47,0.646
+Composite foods,sugars_100g,best,4,denny-s,28,0.671
+Composite foods,sugars_100g,best,5,jeune montagne,22,0.682
+Composite foods,sugars_100g,worst,1,dolciaria-val-d-enza,26,33.035
+Composite foods,sugars_100g,worst,2,gerlinéa,20,11.01
+Composite foods,sugars_100g,worst,3,unes,59,9.881
+Composite foods,sugars_100g,worst,4,feed,29,9.825
+Composite foods,sugars_100g,worst,5,e-leclerc,73,9.729
+Fat and sauces,salt_100g,best,1,carbonell,42,0.0
+Fat and sauces,salt_100g,best,2,clemente,38,0.0
+Fat and sauces,salt_100g,best,3,farchioni,31,0.0
+Fat and sauces,salt_100g,best,4,desantis,30,0.0
+Fat and sauces,salt_100g,best,5,basso,29,0.0
+Fat and sauces,salt_100g,worst,1,pearl river bridge,23,15.41
+Fat and sauces,salt_100g,worst,2,healthy boy brand,25,12.729
+Fat and sauces,salt_100g,worst,3,kikkoman,135,10.993
+Fat and sauces,salt_100g,worst,4,amoy,27,10.857
+Fat and sauces,salt_100g,worst,5,suzi wan,50,10.341
+Fat and sauces,saturated_fat_100g,best,1,mazzetti,30,0.0
+Fat and sauces,saturated_fat_100g,best,2,la-victoria,23,0.0
+Fat and sauces,saturated_fat_100g,best,3,red-gold,20,0.005
+Fat and sauces,saturated_fat_100g,best,4,pearl river bridge,23,0.01
+Fat and sauces,saturated_fat_100g,best,5,otafuku,23,0.015
+Fat and sauces,saturated_fat_100g,worst,1,paysan breton,45,57.809
+Fat and sauces,saturated_fat_100g,worst,2,nutiva,39,56.115
+Fat and sauces,saturated_fat_100g,worst,3,grand fermage,37,56.101
+Fat and sauces,saturated_fat_100g,worst,4,le gall,37,53.973
+Fat and sauces,saturated_fat_100g,worst,5,amul,23,53.348
+Fat and sauces,sugars_100g,best,1,primadonna,68,0.0
+Fat and sauces,sugars_100g,best,2,terra delyssa,43,0.0
+Fat and sauces,sugars_100g,best,3,carbonell,42,0.0
+Fat and sauces,sugars_100g,best,4,la-tourangelle,40,0.0
+Fat and sauces,sugars_100g,best,5,clemente,38,0.0
+Fat and sauces,sugars_100g,worst,1,lazzaris,21,47.365
+Fat and sauces,sugars_100g,worst,2,mussini,21,40.887
+Fat and sauces,sugars_100g,worst,3,sweet baby ray's,20,37.344
+Fat and sauces,sugars_100g,worst,4,sweet-baby-ray-s,22,36.745
+Fat and sauces,sugars_100g,worst,5,mazzetti,30,31.373
+Fish Meat Eggs,salt_100g,best,1,h-f-s,85,0.164
+Fish Meat Eggs,salt_100g,best,2,loue,117,0.171
+Fish Meat Eggs,salt_100g,best,3,la-nouvelle-agriculture,873,0.175
+Fish Meat Eggs,salt_100g,best,4,les-fermiers-de-loue,34,0.194
+Fish Meat Eggs,salt_100g,best,5,duc,26,0.217
+Fish Meat Eggs,salt_100g,worst,1,marinoë,23,7.455
+Fish Meat Eggs,salt_100g,worst,2,de-nuestra-tierra,23,7.339
+Fish Meat Eggs,salt_100g,worst,3,delicius,64,6.902
+Fish Meat Eggs,salt_100g,worst,4,rizzoli,89,6.393
+Fish Meat Eggs,salt_100g,worst,5,zarotti,47,6.18
+Fish Meat Eggs,saturated_fat_100g,best,1,chicken-of-the-sea,28,0.262
+Fish Meat Eggs,saturated_fat_100g,best,2,aqua-star,24,0.467
+Fish Meat Eggs,saturated_fat_100g,best,3,heiploeg,31,0.503
+Fish Meat Eggs,saturated_fat_100g,best,4,panapesca,52,0.519
+Fish Meat Eggs,saturated_fat_100g,best,5,starkist,51,0.544
+Fish Meat Eggs,saturated_fat_100g,worst,1,pick,32,17.775
+Fish Meat Eggs,saturated_fat_100g,worst,2,bifi,23,16.87
+Fish Meat Eggs,saturated_fat_100g,worst,3,marten,31,15.1
+Fish Meat Eggs,saturated_fat_100g,worst,4,francaise-de-gastronomie,24,14.883
+Fish Meat Eggs,saturated_fat_100g,worst,5,césar moroni,23,14.709
+Fish Meat Eggs,sugars_100g,best,1,h-f-s,85,0.0
+Fish Meat Eggs,sugars_100g,best,2,consorcio,33,0.0
+Fish Meat Eggs,sugars_100g,best,3,auriga,25,0.0
+Fish Meat Eggs,sugars_100g,best,4,herens,25,0.0
+Fish Meat Eggs,sugars_100g,best,5,as do mar,21,0.0
+Fish Meat Eggs,sugars_100g,worst,1,jack link's,59,15.802
+Fish Meat Eggs,sugars_100g,worst,2,oberto,36,13.302
+Fish Meat Eggs,sugars_100g,worst,3,jack-link-s,39,13.037
+Fish Meat Eggs,sugars_100g,worst,4,ball-park,21,10.465
+Fish Meat Eggs,sugars_100g,worst,5,homann,26,5.169
+Fruits and vegetables,salt_100g,best,1,côteaux nantais,49,0.001
+Fruits and vegetables,salt_100g,best,2,melinda,31,0.002
+Fruits and vegetables,salt_100g,best,3,gogo squeez,27,0.002
+Fruits and vegetables,salt_100g,best,4,vergers gourmands,65,0.003
+Fruits and vegetables,salt_100g,best,5,planet bio,33,0.003
+Fruits and vegetables,salt_100g,worst,1,podravka,22,3.777
+Fruits and vegetables,salt_100g,worst,2,maggi,71,3.441
+Fruits and vegetables,salt_100g,worst,3,feinkost dittmann,22,3.381
+Fruits and vegetables,salt_100g,worst,4,idahoan,21,3.134
+Fruits and vegetables,salt_100g,worst,5,régal soupe,26,2.755
+Fruits and vegetables,saturated_fat_100g,best,1,key-food,87,0.0
+Fruits and vegetables,saturated_fat_100g,best,2,raley-s,82,0.0
+Fruits and vegetables,saturated_fat_100g,best,3,ahold,77,0.0
+Fruits and vegetables,saturated_fat_100g,best,4,lowes-foods,62,0.0
+Fruits and vegetables,saturated_fat_100g,best,5,market-pantry,54,0.0
+Fruits and vegetables,saturated_fat_100g,worst,1,vahiné,23,22.248
+Fruits and vegetables,saturated_fat_100g,worst,2,enerbio,28,15.121
+Fruits and vegetables,saturated_fat_100g,worst,3,meyva,28,12.043
+Fruits and vegetables,saturated_fat_100g,worst,4,daco-bello,28,11.711
+Fruits and vegetables,saturated_fat_100g,worst,5,ekoplaza,44,8.99
+Fruits and vegetables,sugars_100g,best,1,nova,34,0.471
+Fruits and vegetables,sugars_100g,best,2,champinter,22,0.798
+Fruits and vegetables,sugars_100g,best,3,olvac,24,0.8
+Fruits and vegetables,sugars_100g,best,4,olabe,24,0.837
+Fruits and vegetables,sugars_100g,best,5,les crudettes,28,0.931
+Fruits and vegetables,sugars_100g,worst,1,cruzilles,31,69.79
+Fruits and vegetables,sugars_100g,worst,2,ocean spray,21,62.535
+Fruits and vegetables,sugars_100g,worst,3,sun-maid,23,60.308
+Fruits and vegetables,sugars_100g,worst,4,brousse vergez,27,57.263
+Fruits and vegetables,sugars_100g,worst,5,holy fruits,22,55.073
+Milk and dairy products,salt_100g,best,1,danao,26,0.0
+Milk and dairy products,salt_100g,best,2,gioia,27,0.017
+Milk and dairy products,salt_100g,best,3,terre-adelice,32,0.034
+Milk and dairy products,salt_100g,best,4,terre adélice,44,0.053
+Milk and dairy products,salt_100g,best,5,jampi,37,0.057
+Milk and dairy products,salt_100g,worst,1,crystal farms,26,4.013
+Milk and dairy products,salt_100g,worst,2,eldorado,23,3.812
+Milk and dairy products,salt_100g,worst,3,velveeta,20,3.601
+Milk and dairy products,salt_100g,worst,4,societe,26,3.348
+Milk and dairy products,salt_100g,worst,5,gabriel-coulet,20,3.33
+Milk and dairy products,saturated_fat_100g,best,1,danao,26,0.0
+Milk and dairy products,saturated_fat_100g,best,2,dolfin,35,0.011
+Milk and dairy products,saturated_fat_100g,best,3,taillefine,62,0.169
+Milk and dairy products,saturated_fat_100g,best,4,skyr,47,0.31
+Milk and dairy products,saturated_fat_100g,best,5,yopro,43,0.315
+Milk and dairy products,saturated_fat_100g,worst,1,valle-de-san-juan,58,27.654
+Milk and dairy products,saturated_fat_100g,worst,2,entrepinares,733,24.216
+Milk and dairy products,saturated_fat_100g,worst,3,fromageries-arnaud,20,23.425
+Milk and dairy products,saturated_fat_100g,worst,4,gabriel-coulet,20,23.0
+Milk and dairy products,saturated_fat_100g,worst,5,old-amsterdam,28,22.915
+Milk and dairy products,sugars_100g,best,1,sartori,41,0.0
+Milk and dairy products,sugars_100g,best,2,tillamook-county-creamery-association,35,0.0
+Milk and dairy products,sugars_100g,best,3,armstrong,25,0.0
+Milk and dairy products,sugars_100g,best,4,go-veggie,21,0.0
+Milk and dairy products,sugars_100g,best,5,rumiano,20,0.0
+Milk and dairy products,sugars_100g,worst,1,nuii,69,28.819
+Milk and dairy products,sugars_100g,worst,2,trium,46,27.175
+Milk and dairy products,sugars_100g,worst,3,ice fantasy,30,26.78
+Milk and dairy products,sugars_100g,worst,4,glaces des alpes,36,26.586
+Milk and dairy products,sugars_100g,worst,5,froneri,152,26.511
+Salty snacks,salt_100g,best,1,belbake,21,0.018
+Salty snacks,salt_100g,best,2,sun,46,0.126
+Salty snacks,salt_100g,best,3,bakador,26,0.128
+Salty snacks,salt_100g,best,4,bioladen,22,0.138
+Salty snacks,salt_100g,best,5,justebio,23,0.157
+Salty snacks,salt_100g,worst,1,barral,30,5.567
+Salty snacks,salt_100g,worst,2,montfort,51,5.297
+Salty snacks,salt_100g,worst,3,tropic apéro,33,4.885
+Salty snacks,salt_100g,worst,4,feinkost-dittmann,28,4.483
+Salty snacks,salt_100g,worst,5,crespo,67,4.376
+Salty snacks,saturated_fat_100g,best,1,kuhne,25,0.285
+Salty snacks,saturated_fat_100g,best,2,freshona,30,0.52
+Salty snacks,saturated_fat_100g,best,3,ancel,50,0.754
+Salty snacks,saturated_fat_100g,best,4,snyder-s-of-hanover,40,0.982
+Salty snacks,saturated_fat_100g,best,5,triscuit,30,1.061
+Salty snacks,saturated_fat_100g,worst,1,terres paysannes,22,23.982
+Salty snacks,saturated_fat_100g,worst,2,lartigue,38,23.884
+Salty snacks,saturated_fat_100g,worst,3,jean-larnaudie,32,23.786
+Salty snacks,saturated_fat_100g,worst,4,maison-montfort,56,22.984
+Salty snacks,saturated_fat_100g,worst,5,maison montfort,117,22.944
+Salty snacks,sugars_100g,best,1,ficacci,34,0.001
+Salty snacks,sugars_100g,best,2,sarasa,27,0.048
+Salty snacks,sugars_100g,best,3,madama-oliva,24,0.075
+Salty snacks,sugars_100g,best,4,baresa,68,0.135
+Salty snacks,sugars_100g,best,5,salviani,37,0.151
+Salty snacks,sugars_100g,worst,1,den lille nøttefabrikken,23,18.781
+Salty snacks,sugars_100g,worst,2,chabrior,22,14.907
+Salty snacks,sugars_100g,worst,3,kazidomi,29,14.407
+Salty snacks,sugars_100g,worst,4,gavottes,24,13.771
+Salty snacks,sugars_100g,worst,5,snacks of the world,30,11.203
+Sugary snacks,salt_100g,best,1,airwaves,35,0.0
+Sugary snacks,salt_100g,best,2,les anis de flavigny®,34,0.0
+Sugary snacks,salt_100g,best,3,la vieja fábrica,32,0.0
+Sugary snacks,salt_100g,best,4,lerum,24,0.0
+Sugary snacks,salt_100g,best,5,hilco,20,0.0
+Sugary snacks,salt_100g,worst,1,tosh,23,3.255
+Sugary snacks,salt_100g,worst,2,milky way,21,2.922
+Sugary snacks,salt_100g,worst,3,4-nutrition,25,2.722
+Sugary snacks,salt_100g,worst,4,bella-contadina,22,2.416
+Sugary snacks,salt_100g,worst,5,menozzi,29,2.346
+Sugary snacks,saturated_fat_100g,best,1,wiener-bezirksimkerei,101,0.0
+Sugary snacks,saturated_fat_100g,best,2,les compagnons du miel,55,0.0
+Sugary snacks,saturated_fat_100g,best,3,mike-and-ike,51,0.0
+Sugary snacks,saturated_fat_100g,best,4,saint louis,48,0.0
+Sugary snacks,saturated_fat_100g,best,5,bellamy,44,0.0
+Sugary snacks,saturated_fat_100g,worst,1,mathez,106,37.868
+Sugary snacks,saturated_fat_100g,worst,2,lindt lindor,22,34.853
+Sugary snacks,saturated_fat_100g,worst,3,lindor,246,34.716
+Sugary snacks,saturated_fat_100g,worst,4,lindt-sprungli-schweiz-ag,42,32.988
+Sugary snacks,saturated_fat_100g,worst,5,truffettes de france,30,29.83
+Sugary snacks,sugars_100g,best,1,freedent,44,0.0
+Sugary snacks,sugars_100g,best,2,orbit,44,0.0
+Sugary snacks,sugars_100g,best,3,airwaves,35,0.0
+Sugary snacks,sugars_100g,best,4,smint,29,0.0
+Sugary snacks,sugars_100g,best,5,jetgum,31,0.077
+Sugary snacks,sugars_100g,worst,1,diamant,32,99.584
+Sugary snacks,sugars_100g,worst,2,erstein,21,99.514
+Sugary snacks,sugars_100g,worst,3,südzucker,20,99.4
+Sugary snacks,sugars_100g,worst,4,tereos,37,99.359
+Sugary snacks,sugars_100g,worst,5,saint louis,48,99.063

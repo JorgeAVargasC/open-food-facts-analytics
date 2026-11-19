@@ -112,6 +112,8 @@ hdfs dfs -cat /data/raw/openfoodfacts.csv \
 hdfs dfs -ls -h /data/raw
 ```
 
+![hdfs dfs -ls -h /data/raw en el cliente ingest](docs/assets/hdfs-ls-data-raw.png)
+
 También se ve en la web de HDFS (`./tunnels.sh` → Utilities → Browse the file system → `/data/raw`): 13 GB y 270 MB, dueño `ingest`, replicación 3, bloques de 128 MB.
 
 ![HDFS: /data/raw](docs/assets/hdfs-web-data-raw.png)
@@ -135,6 +137,12 @@ tail -f clean.out                  # Ctrl+C solo deja de mirar; el job sigue
 yarn application -list             # otra terminal: el job RUNNING (o la web de YARN con ./tunnels.sh)
 hdfs dfs -du -h /data/clean/products   # al acabar: tamaño del Parquet
 ```
+
+En la web de YARN (`http://localhost:8088/cluster/apps`) el job aparece `RUNNING` y la corrida de la muestra, `FINISHED` / `SUCCEEDED`:
+
+![YARN: limpieza completa en ejecución](docs/assets/yarn-clean-running.png)
+
+Los 13 312 MB asignados son 3 executors de 4 096 MB (3 GB de memoria + 512 MB de *overhead*, que YARN redondea a 4 GB) más 1 024 MB del *application master*. Eso es el 72 % de los 18 GB del clúster: por eso no cabe un segundo job a la vez.
 
 Imprime las filas leídas, los productos limpios, los incoherentes y cuántos productos tienen cada dato. Sobrescribe `/data/clean/products` (`mode("overwrite")`): hasta que acabe, ahí está la versión de la muestra. No lanzar consultas mientras corre: los 18 GB de YARN no alcanzan para las dos cosas.
 
@@ -175,6 +183,7 @@ Los clientes tienen Hadoop y la configuración del clúster, así que `hdfs` y `
 | Salud de los bloques | `hdfs fsck /data \| tail -15` | master |
 | Nodos de YARN | `yarn node -list` | cliente o master |
 | Jobs en ejecución / todos | `yarn application -list` · `yarn application -list -appStates ALL` | cliente o master |
+| Progreso real de un job | `ssh -i ~/.ssh/vockey.pem -N -L 4040:localhost:4040 ec2-user@<DNS del cliente que lo lanzó>` → `http://localhost:4040` (el 10 % de YARN es fijo en modo client) | tu equipo (WSL) |
 | Logs de un job (executors) | `yarn logs -applicationId <id> \| less` | cliente del usuario que lanzó el job |
 | Matar un job | `yarn application -kill <id>` | cliente del usuario que lo lanzó |
 | Lanzar un job de Spark | `spark-submit query/q05-brands-by-pnns-group.py` | cliente, en `open-food-facts-analytics/` |

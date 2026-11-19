@@ -36,11 +36,15 @@ if ! aws sts get-caller-identity > /dev/null; then
 fi
 
 echo "== 1. Ansible"
-# Playbook de clase. Hadoop 3.3.6 ya no está en dlcdn: se descarga del archivo de Apache
+# Playbook de clase, con dos ajustes de descarga (se aplican siempre; repetirlos no hace nada):
+# Hadoop 3.3.6 desde archive.apache.org (dlcdn solo guarda versiones vigentes) y
+# Spark 3.5.9 desde dlcdn (el CDN rápido; la 3.5.5 ya no está allí)
 if [ ! -d ~/hadoop-ansible-ec2 ]; then
   git clone -q https://github.com/memaldi/hadoop-ansible-ec2 ~/hadoop-ansible-ec2
-  sed -i 's|https://dlcdn.apache.org/hadoop/common/|https://archive.apache.org/dist/hadoop/common/|' ~/hadoop-ansible-ec2/create-instances.yml
 fi
+sed -i -e 's|https://dlcdn.apache.org/hadoop/common/|https://archive.apache.org/dist/hadoop/common/|' \
+       -e 's|https://archive.apache.org/dist/spark/|https://dlcdn.apache.org/spark/|' \
+       -e 's|spark-3\.5\.5|spark-3.5.9|g' ~/hadoop-ansible-ec2/create-instances.yml
 # Entorno de Python con Ansible
 if [ ! -x ~/ansible/bin/ansible-playbook ]; then
   python3 -m venv ~/ansible

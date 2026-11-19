@@ -4,7 +4,7 @@
 set -euo pipefail
 ROLE=$1
 
-if [ -x ~/spark-3.5.5-bin-hadoop3/bin/spark-submit ]; then
+if [ -x ~/spark-3.5.9-bin-hadoop3/bin/spark-submit ]; then
   echo "Hadoop y Spark ya instalados"
   exit 0
 fi
@@ -19,10 +19,10 @@ fi
 
 # Descomprimir lo que copió el master
 tar -xzf ~/hadoop-3.3.6.tar.gz -C ~
-tar -xzf ~/spark-3.5.5-bin-hadoop3.tgz -C ~
+tar -xzf ~/spark-3.5.9-bin-hadoop3.tgz -C ~
 
 # Spark en YARN: 3 executors (uno por worker) de 2 núcleos y 3 GB
-cat > ~/spark-3.5.5-bin-hadoop3/conf/spark-defaults.conf <<'CONF'
+cat > ~/spark-3.5.9-bin-hadoop3/conf/spark-defaults.conf <<'CONF'
 spark.master                   yarn
 spark.submit.deployMode        client
 spark.driver.memory            2g
@@ -37,7 +37,7 @@ cat >> ~/.bashrc <<VARS
 export JAVA_HOME=/usr/lib/jvm/java
 export HADOOP_HOME=\$HOME/hadoop-3.3.6
 export HADOOP_CONF_DIR=\$HADOOP_HOME/etc/hadoop
-export SPARK_HOME=\$HOME/spark-3.5.5-bin-hadoop3
+export SPARK_HOME=\$HOME/spark-3.5.9-bin-hadoop3
 export PATH=\$PATH:\$HADOOP_HOME/bin:\$SPARK_HOME/bin
 export HADOOP_USER_NAME=$ROLE
 VARS

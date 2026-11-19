@@ -16,7 +16,7 @@ setup() {
 
   echo "== /etc/hosts del master con los dos clientes"
   if ! grep -q hadoop-client /etc/hosts; then
-    sudo tee -a /etc/hosts < clients-hosts.txt
+    (echo; cat clients-hosts.txt) | sudo tee -a /etc/hosts   # echo: el archivo no termina en salto de línea
   fi
 
   echo "== YARN de los workers: 6 GB por nodo"
@@ -42,14 +42,14 @@ setup() {
     grep -v hadoop-client /etc/hosts | ssh $client "sudo tee /etc/hosts > /dev/null"
 
     # Los mismos Hadoop y Spark que instaló Ansible en el master, y su configuración
-    ssh $client "test -f spark-3.5.5-bin-hadoop3.tgz" || scp -q ~/hadoop-3.3.6.tar.gz ~/spark-3.5.5-bin-hadoop3.tgz $client:
+    ssh $client "test -f spark-3.5.9-bin-hadoop3.tgz" || scp -q ~/hadoop-3.3.6.tar.gz ~/spark-3.5.9-bin-hadoop3.tgz $client:
     ssh $client "rm -rf open-food-facts-analytics && mkdir open-food-facts-analytics"
     tar -cf - run.sh cluster/client.sh $role | ssh $client "tar -C open-food-facts-analytics -xf -"
     ssh $client "bash open-food-facts-analytics/cluster/client.sh $role"
     scp -q $HADOOP/etc/hadoop/core-site.xml $HADOOP/etc/hadoop/yarn-site.xml $client:hadoop-3.3.6/etc/hadoop/
 
     # Prueba: SparkPi en YARN lanzado desde el cliente
-    ssh $client "bash -lc 'spark-submit spark-3.5.5-bin-hadoop3/examples/src/main/python/pi.py 10 2> /dev/null'"
+    ssh $client "bash -lc 'spark-submit spark-3.5.9-bin-hadoop3/examples/src/main/python/pi.py 10 2> /dev/null'"
   done
   echo "Esperado: dos veces Pi is roughly 3.14"
 

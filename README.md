@@ -73,15 +73,8 @@ Cuando Ansible termina, en EC2 hay 4 instancias `running` (master y 3 workers) c
 
 ![Master y workers en EC2](docs/assets/ec2-instances-ansible.png)
 
-> [!WARNING]
-> Si Ansible se queda parado en `Download Spark` más de 35 min: Ctrl+C y, si el master ya tiene `~/spark-3.5.5-bin-hadoop3.tgz` (383 MB), seguir desde la tarea siguiente y relanzar `up.sh`:
->
-> ```bash
-> source ~/ansible/bin/activate && cd ~/hadoop-ansible-ec2
-> ansible-playbook -i inventory.aws_ec2.yml --key-file ~/.ssh/vockey.pem --user ec2-user \
->   create-instances.yml --start-at-task "Extract Spark"
-> cd - && ./up.sh
-> ```
+> [!NOTE]
+> La primera vez, Ansible tarda ≈ 15-20 min, casi todo en `Download Hadoop` (archive.apache.org limita la velocidad). Es una sola vez: con `./down.sh --stop` y `./up.sh` los nodos se reutilizan y no se descarga nada. No interrumpas Ansible a mitad.
 
 ## Limpieza (cliente ingest)
 

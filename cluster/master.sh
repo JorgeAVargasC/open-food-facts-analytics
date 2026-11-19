@@ -44,7 +44,7 @@ setup() {
     # Los mismos Hadoop y Spark que instaló Ansible en el master, y su configuración
     ssh $client "test -f spark-3.5.9-bin-hadoop3.tgz" || scp -q ~/hadoop-3.3.6.tar.gz ~/spark-3.5.9-bin-hadoop3.tgz $client:
     ssh $client "rm -rf open-food-facts-analytics && mkdir open-food-facts-analytics"
-    tar -cf - run.sh cluster/client.sh $role | ssh $client "tar -C open-food-facts-analytics -xf -"
+    tar -cf - cluster/client.sh $role | ssh $client "tar -C open-food-facts-analytics -xf -"
     ssh $client "bash open-food-facts-analytics/cluster/client.sh $role"
     scp -q $HADOOP/etc/hadoop/core-site.xml $HADOOP/etc/hadoop/yarn-site.xml $client:hadoop-3.3.6/etc/hadoop/
 

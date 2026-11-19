@@ -32,6 +32,10 @@ spark.executor.memory          3g
 spark.executor.memoryOverhead  512m
 CONF
 
+# Solo avisos y errores en pantalla (por defecto Spark imprime mucho INFO)
+sed 's/rootLogger.level = info/rootLogger.level = warn/' \
+  ~/spark-3.5.9-bin-hadoop3/conf/log4j2.properties.template > ~/spark-3.5.9-bin-hadoop3/conf/log4j2.properties
+
 # Variables de entorno. HADOOP_USER_NAME es el usuario con el que el cliente entra a HDFS
 cat >> ~/.bashrc <<VARS
 export JAVA_HOME=/usr/lib/jvm/java

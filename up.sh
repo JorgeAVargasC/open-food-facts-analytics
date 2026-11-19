@@ -95,7 +95,7 @@ echo "== 4. Configuración"
 dns=$(info hadoop-master PublicDnsName)
 master="ssh $OPTS ec2-user@$dns"
 $master "rm -rf open-food-facts-analytics && mkdir open-food-facts-analytics"
-tar -cf - run.sh cluster ingest query | $master "tar -C open-food-facts-analytics -xf -"
+tar -cf - cluster ingest query | $master "tar -C open-food-facts-analytics -xf -"
 
 # IPs privadas de los clientes, para el /etc/hosts del master
 for role in $CLIENTS; do
@@ -105,10 +105,8 @@ done | $master "cat > open-food-facts-analytics/clients-hosts.txt"
 scp $OPTS -q $KEY ec2-user@"$dns":.ssh/vockey.pem   # el master entra en los demás nodos con ella
 $master "cd open-food-facts-analytics && ./cluster/master.sh setup"
 
-echo "== 5. Datos en HDFS (desde el cliente ingest)"
-$master "ssh hadoop-client-ingest 'bash open-food-facts-analytics/ingest/load.sh'"
-
 echo
 echo "Listo. El DNS del master cambia en cada arranque; para volver a verlo: ./nodes.sh"
 ./nodes.sh
 echo "Webs de HDFS y YARN: ./tunnels.sh"
+echo "Siguiente, a mano: ./sync.sh y cargar los datos en el cliente ingest (ver el README)"

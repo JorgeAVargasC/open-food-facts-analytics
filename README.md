@@ -24,15 +24,14 @@ Preguntas analíticas con Spark sobre el CSV de Open Food Facts (≈ 4,9 M produ
 ## Archivos
 
 ```
-up.sh                 tu equipo: levanta todo (crea, enciende, configura y sube los datos)
+up.sh                 tu equipo: levanta el clúster (crea, enciende y configura)
+sync.sh               tu equipo: copia ingest/ o query/ a cada cliente
 down.sh               tu equipo: borra todo (o --stop para solo apagar)
 nodes.sh              tu equipo: lista los nodos y el SSH de cada uno
 tunnels.sh            tu equipo: abre las webs de HDFS y YARN en localhost (stop para cerrarlas)
-run.sh                cliente: lanza un job de Spark en YARN
 cluster/master.sh     master: setup (SSH, /etc/hosts, YARN, carpetas de HDFS, clientes) | check
 cluster/client.sh     cliente: instala Java, Hadoop y Spark y fija su usuario de HDFS
 cluster/worker-yarn-site.xml   YARN de los workers: 6 GB por nodo
-ingest/load.sh        cliente ingest: descarga el CSV y lo sube a HDFS
 ingest/clean.py       cliente ingest: CSV → Parquet limpio
 query/q05…q08.py      cliente query: una pregunta por archivo
 query/plots.py        cliente query: gráficas de las preguntas
@@ -63,9 +62,12 @@ query/plots.py        cliente query: gráficas de las preguntas
 1. Ansible de clase (`memaldi/hadoop-ansible-ec2`): master y 3 workers con HDFS y YARN. Solo si no hay master (formatea HDFS).
 2. Los dos clientes, con la misma AMI que el master.
 3. `cluster/master.sh setup` en el master. Termina con dos SparkPi (uno por cliente) y el `check`.
-4. `ingest/load.sh` en el cliente ingest: el CSV a HDFS (~15 min).
 
-Al final imprime el `ssh` del master y los túneles de las webs de HDFS (50070) y YARN (8088).
+Al final lista los nodos con su `ssh`. Lo demás se hace a mano, entrando a cada cliente (secciones siguientes).
+
+Al terminar, en EC2 hay las 6 instancias `running` con los status checks en verde (master y workers `t3.large`, clientes `t2.large`):
+
+![Las 6 instancias del clúster en EC2](docs/assets/ec2-six-instances-running.png)
 
 Si va bien, tras `== 2. Master y workers` salen las tareas de Ansible (15–40 min). No interrumpirlo:
 
@@ -89,25 +91,60 @@ Cuando Ansible termina, en EC2 hay 4 instancias `running` (master y 3 workers) c
 - Los workers no tienen SSH desde fuera: se entra desde el master (`ssh hadoop-worker-1`).
 - Los clientes se pueden abrir directo con el comando de `nodes.sh`, o desde el master con `ssh hadoop-client-ingest` / `ssh hadoop-client-query`.
 
+## Código y datos (a mano)
+
+```bash
+./sync.sh            # copia ingest/ o query/ a cada cliente; repítelo cada vez que cambies código
+```
+
+Cliente `ingest` (comando de `./nodes.sh`): descargar el CSV a HDFS y crear la muestra.
+
+```bash
+# 1. Descargar y subir directo a HDFS, sin pasar por el disco (~15 min)
+curl -sL https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz \
+  | gunzip | hdfs dfs -put -f - /data/raw/openfoodfacts.csv
+
+# 2. Muestra al azar del 2 %, para probar la limpieza
+hdfs dfs -cat /data/raw/openfoodfacts.csv \
+  | awk 'NR == 1 || rand() < 0.02' | hdfs dfs -put -f - /data/raw/sample.csv
+
+# 3. Comprobar: ~13 G y ~270 M, dueño ingest
+hdfs dfs -ls -h /data/raw
+```
+
+También se ve en la web de HDFS (`./tunnels.sh` → Utilities → Browse the file system → `/data/raw`): 13 GB y 270 MB, dueño `ingest`, replicación 3, bloques de 128 MB.
+
+![HDFS: /data/raw](docs/assets/hdfs-web-data-raw.png)
+
+El `-` de `put -f - <ruta>` lee de la entrada estándar: así `curl` y `gunzip` encadenados con `|` llegan a HDFS sin ocupar disco en el cliente. Si se ejecuta desde `query`, HDFS responde `Permission denied` (`/data` es de `ingest`).
+
 ## Limpieza (cliente ingest)
 
-Desde el master: `ssh hadoop-client-ingest`.
+Entrar con el comando de `./nodes.sh` (`hadoop-client-ingest`).
 
 ```bash
 cd open-food-facts-analytics
-./run.sh ingest/clean.py hdfs:///data/raw/sample.csv   # prueba con la muestra (~1 min)
-./run.sh ingest/clean.py                               # CSV completo
+spark-submit ingest/clean.py hdfs:///data/raw/sample.csv   # prueba con la muestra (~1 min)
 ```
 
-Imprime las filas leídas, los productos limpios, los incoherentes y cuántos productos tienen cada dato.
+Con la muestra sale `OK` y deja un Parquet pequeño (~3 MB). Después, el CSV completo (13 GB). En segundo plano, para que un corte de SSH no lo mate:
+
+```bash
+nohup spark-submit ingest/clean.py > clean.out 2>&1 &
+tail -f clean.out                  # Ctrl+C solo deja de mirar; el job sigue
+yarn application -list             # otra terminal: el job RUNNING (o la web de YARN con ./tunnels.sh)
+hdfs dfs -du -h /data/clean/products   # al acabar: tamaño del Parquet
+```
+
+Imprime las filas leídas, los productos limpios, los incoherentes y cuántos productos tienen cada dato. Sobrescribe `/data/clean/products` (`mode("overwrite")`): hasta que acabe, ahí está la versión de la muestra. No lanzar consultas mientras corre: los 18 GB de YARN no alcanzan para las dos cosas.
 
 ## Preguntas (cliente query)
 
-Desde el master: `ssh hadoop-client-query`.
+Entrar con el comando de `./nodes.sh` (`hadoop-client-query`). Solo después de que acabe la limpieza completa.
 
 ```bash
 cd open-food-facts-analytics
-for f in query/q0*.py; do ./run.sh "$f"; done
+for f in query/q0*.py; do spark-submit "$f"; done
 hdfs dfs -get -f /results ./results && python3 query/plots.py   # PNG en figures/
 ```
 
@@ -122,26 +159,26 @@ hdfs dfs -get -f /results ./results && python3 query/plots.py   # PNG en figures
 
 En el master: `./open-food-facts-analytics/cluster/master.sh check` → procesos de cada nodo, `Live datanodes (3)`, `Total Nodes:3`, dueños de `/data` y `/results` y `Permission denied` cuando `query` intenta escribir en `/data`.
 
-Logs: los de cada job en `logs/` del cliente; los de los executors, `yarn logs -applicationId <id>`.
+Logs: el driver imprime sus errores en la terminal del cliente; los de los executors, `yarn logs -applicationId <id>`.
 
 ## Comandos útiles
 
-En un **cliente** (actúas como `ingest` o `query`) salvo donde dice *master* (allí eres `ec2-user`, el superusuario de HDFS).
+Los clientes tienen Hadoop y la configuración del clúster, así que `hdfs` y `yarn` funcionan desde ahí con tu usuario (`ingest` o `query`). El master es el superusuario de HDFS (`ec2-user`): allí van los comandos de administración.
 
-| Para… | Comando |
-|---|---|
-| Ver carpetas y tamaños | `hdfs dfs -ls /data` · `hdfs dfs -du -h /data` · `hdfs dfs -df -h` |
-| Mirar un resultado | `hdfs dfs -cat /results/q05-*/part-*.csv \| head` |
-| Bajar un resultado a un archivo | `hdfs dfs -getmerge /results/q05-* q05.csv` |
-| Borrar (solo tu carpeta) | `hdfs dfs -rm -r /results/q05-*` |
-| Estado de HDFS, *master* | `hdfs dfsadmin -report \| head -20` (`Live datanodes (3)`) |
-| Salud de los bloques, *master* | `hdfs fsck /data \| tail -15` |
-| Nodos de YARN | `yarn node -list` |
-| Jobs en ejecución / todos | `yarn application -list` · `yarn application -list -appStates ALL` |
-| Logs de un job (executors) | `yarn logs -applicationId <id> \| less` |
-| Matar un job | `yarn application -kill <id>` |
-| Lanzar un job de Spark | `./run.sh query/q05-brands-by-pnns-group.py` (log en `logs/`) |
-| Procesos Java de un nodo | `jps` (master: NameNode, ResourceManager; worker: DataNode, NodeManager) |
-| Reiniciar un servicio, en el nodo | `sudo systemctl restart nodemanager` (también `datanode`, `namenode`, `resourcemanager`) |
-| Qué usuario soy en HDFS | `echo $HADOOP_USER_NAME` |
-| Instancias desde tu equipo | `aws ec2 describe-instances --filters "Name=tag:Name,Values=hadoop-*" --query "Reservations[].Instances[].[Tags[0].Value,State.Name]" --output text` |
+| Para… | Comando | Dónde |
+|---|---|---|
+| Ver carpetas y tamaños | `hdfs dfs -ls /data` · `hdfs dfs -du -h /data` · `hdfs dfs -df -h` | cliente o master |
+| Mirar un resultado | `hdfs dfs -cat /results/q05-*/part-*.csv \| head` | cliente |
+| Bajar un resultado a un archivo | `hdfs dfs -getmerge /results/q05-* q05.csv` | cliente |
+| Borrar | `hdfs dfs -rm -r /results/q05-*` | cliente `query` (su carpeta `/results`); `/data`, cliente `ingest` |
+| Estado de HDFS | `hdfs dfsadmin -report \| head -20` (`Live datanodes (3)`) | master |
+| Salud de los bloques | `hdfs fsck /data \| tail -15` | master |
+| Nodos de YARN | `yarn node -list` | cliente o master |
+| Jobs en ejecución / todos | `yarn application -list` · `yarn application -list -appStates ALL` | cliente o master |
+| Logs de un job (executors) | `yarn logs -applicationId <id> \| less` | cliente del usuario que lanzó el job |
+| Matar un job | `yarn application -kill <id>` | cliente del usuario que lo lanzó |
+| Lanzar un job de Spark | `spark-submit query/q05-brands-by-pnns-group.py` | cliente, en `open-food-facts-analytics/` |
+| Procesos Java | `jps` (master: NameNode, ResourceManager; worker: DataNode, NodeManager) | en el nodo (workers: `ssh hadoop-worker-1` desde el master) |
+| Reiniciar un servicio | `sudo systemctl restart nodemanager` (también `datanode`, `namenode`, `resourcemanager`) | en el nodo que lo ejecuta |
+| Qué usuario soy en HDFS | `echo $HADOOP_USER_NAME` | cliente |
+| Ver las instancias | `./nodes.sh` · `aws ec2 describe-instances --filters "Name=tag:Name,Values=hadoop-*" --query "Reservations[].Instances[].[Tags[0].Value,State.Name]" --output text` | tu equipo (WSL) |

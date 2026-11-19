@@ -1,4 +1,4 @@
-"""Limpieza: CSV en bruto a Parquet limpio. Uso: spark-submit ingest/clean.py [hdfs:///data/raw/sample.csv]"""
+"""Limpieza: CSV en bruto a Parquet limpio. Uso: spark-submit ingest/clean-products.py [hdfs:///data/raw/sample.csv]"""
 
 import sys
 

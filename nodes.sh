@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
-# Tu equipo: lista los nodos encendidos y cómo entrar por SSH a cada uno.
+# Los nodos encendidos, su IP privada y cómo entrar por SSH a cada uno.
 set -euo pipefail
-KEY=~/.ssh/vockey.pem
-NODES="hadoop-master,hadoop-worker-1,hadoop-worker-2,hadoop-worker-3,hadoop-client-ingest,hadoop-client-query"
+source "$(dirname "$0")/cluster/common.sh"
 
-# Nombre, IP privada y DNS público de cada nodo encendido
 aws ec2 describe-instances \
   --filters "Name=tag:Name,Values=$NODES" "Name=instance-state-name,Values=running" \
   --query "Reservations[].Instances[].[Tags[?Key=='Name']|[0].Value,PrivateIpAddress,PublicDnsName]" \

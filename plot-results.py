@@ -1,7 +1,6 @@
-"""Gráficas de las preguntas. Uso, en el cliente query:
-hdfs dfs -get -f /results ./results && python3 query/plots.py
+"""Gráficas de las preguntas, en tu equipo. Uso: ./pull.sh && python3 plot-results.py
+Lee results/qNN-….csv y deja al lado results/qNN-….png.
 """
-import glob
 import os
 
 import matplotlib
@@ -9,21 +8,19 @@ matplotlib.use("Agg")  # sin pantalla: solo guarda los PNG
 import matplotlib.pyplot as plt
 import pandas as pd
 
-RESULTS = "results"
-FIGURES = "figures"
-os.makedirs(FIGURES, exist_ok=True)
+RESULTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
 
 
 def read(name):
-    """El CSV que dejó Spark en results/<name>/part-*.csv"""
-    return pd.read_csv(glob.glob(f"{RESULTS}/{name}/part-*.csv")[0])
+    """El CSV de una pregunta, tal como lo deja pull.sh"""
+    return pd.read_csv(f"{RESULTS}/{name}.csv")
 
 
 def save(name):
     plt.tight_layout()
-    plt.savefig(f"{FIGURES}/{name}.png", dpi=120)
+    plt.savefig(f"{RESULTS}/{name}.png", dpi=120)
     plt.close()
-    print("Guardada", f"{FIGURES}/{name}.png")
+    print("Guardada", f"results/{name}.png")
 
 
 # P5: un panel por nutriente, en el grupo donde ese nutriente pesa más

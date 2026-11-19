@@ -1,112 +1,21 @@
 #!/usr/bin/env bash
-# Levanta todo el clúster. Se puede relanzar: se salta lo ya hecho.
+# Levantar el clúster, paso a paso. Uso: ./up.sh
+# Se puede relanzar: cada paso se salta lo que ya está hecho.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-KEY=~/.ssh/vockey.pem
-OPTS="-i $KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ServerAliveInterval=30"
-CLIENTS="ingest query"
-NODES="hadoop-master,hadoop-worker-1,hadoop-worker-2,hadoop-worker-3,hadoop-client-ingest,hadoop-client-query"
-EXISTING="pending,running,stopping,stopped"
-
-# IDs de las instancias por nombre y estado
-ids() {
-  aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=$1" "Name=instance-state-name,Values=$2" \
-    --query "Reservations[].Instances[].InstanceId" --output text
-}
-
-# Un dato de una instancia encendida
-info() {
-  aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=$1" "Name=instance-state-name,Values=running" \
-    --query "Reservations[0].Instances[0].$2" --output text
-}
-
-# Comprobar clave y credenciales
-if [ ! -f $KEY ]; then
-  echo "Falta $KEY: cp ~/Downloads/labsuser.pem $KEY && chmod 600 $KEY"
-  exit 1
-fi
-aws configure set region us-east-1
-aws configure set cli_pager ""
-if ! aws sts get-caller-identity > /dev/null; then
-  echo "Pega en ~/.aws/credentials las credenciales del Learner Lab (AWS Details, AWS CLI, Show)"
-  exit 1
-fi
-
-echo "== 1. Ansible"
-# Playbook de clase, con dos ajustes de descarga (se aplican siempre; repetirlos no hace nada):
-# Hadoop 3.3.6 desde archive.apache.org (dlcdn solo guarda versiones vigentes) y
-# Spark 3.5.9 desde dlcdn (el CDN rápido; la 3.5.5 ya no está allí)
-if [ ! -d ~/hadoop-ansible-ec2 ]; then
-  git clone -q https://github.com/memaldi/hadoop-ansible-ec2 ~/hadoop-ansible-ec2
-fi
-sed -i -e 's|https://dlcdn.apache.org/hadoop/common/|https://archive.apache.org/dist/hadoop/common/|' \
-       -e 's|https://archive.apache.org/dist/spark/|https://dlcdn.apache.org/spark/|' \
-       -e 's|spark-3\.5\.5|spark-3.5.9|g' ~/hadoop-ansible-ec2/create-instances.yml
-# Entorno de Python con Ansible
-if [ ! -x ~/ansible/bin/ansible-playbook ]; then
-  python3 -m venv ~/ansible
-  ~/ansible/bin/pip install -q -r ~/hadoop-ansible-ec2/requirements.txt
-fi
-
-echo "== 2. Master y workers"
-# Solo si no hay master: el playbook formatea HDFS
-if [ -z "$(ids hadoop-master $EXISTING)" ]; then
-  export ANSIBLE_SSH_ARGS="-o ServerAliveInterval=30 -o ControlMaster=auto -o ControlPersist=60s"   # que no se corte el SSH
-  source ~/ansible/bin/activate
-  # El inventario de clase toma TODAS las instancias de la cuenta; limitarlo a los nodos de este proyecto
-  cat > ~/hadoop-ansible-ec2/inventory.aws_ec2.yml <<'INV'
-plugin: amazon.aws.aws_ec2
-regions: [us-east-1]
-filters:
-  tag:Group: [hadoop-master, hadoop-worker]
-  instance-state-name: running
-keyed_groups:
-  - prefix: tag
-    key: tags
-INV
-  (cd ~/hadoop-ansible-ec2 && ansible-playbook -i inventory.aws_ec2.yml --key-file $KEY --user ec2-user create-instances.yml)
-fi
-
-echo "== 3. SSH y clientes (ingest y query)"
-aws ec2 authorize-security-group-ingress --group-name hadoop-master-sg \
-  --protocol tcp --port 22 --cidr 0.0.0.0/0 > /dev/null 2>&1 || true   # SSH abierto a cualquier IP
-for role in $CLIENTS; do
-  if [ -z "$(ids hadoop-client-$role $EXISTING)" ]; then
-    # Misma AMI que el master: mismo Java y mismo Python que en los workers
-    aws ec2 run-instances \
-      --image-id "$(info hadoop-master ImageId)" --instance-type t2.large --key-name vockey \
-      --security-groups hadoop-sg hadoop-master-sg \
-      --block-device-mappings "DeviceName=/dev/xvda,Ebs={VolumeSize=50,DeleteOnTermination=true}" \
-      --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=hadoop-client-$role},{Key=Group,Value=hadoop-client}]" \
-      > /dev/null
-  fi
-done
-
-# Encender lo apagado y esperar a que todo acepte SSH
-stopped=$(ids "$NODES" stopped)
-[ -z "$stopped" ] || aws ec2 start-instances --instance-ids $stopped > /dev/null
-echo "Esperando a que las 6 instancias estén listas..."
-aws ec2 wait instance-status-ok --instance-ids $(ids "$NODES" pending,running)
-
-echo "== 4. Configuración"
-dns=$(info hadoop-master PublicDnsName)
-master="ssh $OPTS ec2-user@$dns"
-$master "rm -rf open-food-facts-analytics && mkdir open-food-facts-analytics"
-tar -cf - cluster ingest query | $master "tar -C open-food-facts-analytics -xf -"
-
-# IPs privadas de los clientes, para el /etc/hosts del master
-for role in $CLIENTS; do
-  echo "$(info hadoop-client-$role PrivateIpAddress)  hadoop-client-$role"
-done | $master "cat > open-food-facts-analytics/clients-hosts.txt"
-
-scp $OPTS -q $KEY ec2-user@"$dns":.ssh/vockey.pem   # el master entra en los demás nodos con ella
-$master "cd open-food-facts-analytics && ./cluster/master.sh setup"
+bash cluster/01-prepare.sh           # clave, credenciales y Ansible de clase
+bash cluster/02-master-workers.sh    # master y 3 workers con HDFS y YARN (Ansible)
+bash cluster/03-clients.sh           # crear los clientes ingest y query
+bash cluster/04-start.sh             # encender lo apagado y esperar a las 6 instancias
+bash cluster/05-ssh.sh               # el master entra a todos por nombre; /etc/hosts
+bash cluster/06-yarn-workers.sh      # YARN de los workers: 6 GB y 2 vCores
+bash cluster/07-hdfs-folders.sh      # /data de ingest, /results de query
+bash cluster/08-install-clients.sh   # Java, Hadoop y Spark en los clientes
+bash cluster/09-check.sh             # SparkPi y estado del clúster
+bash push.sh                         # código a los clientes
+bash nodes.sh                        # cómo entrar a cada nodo
+bash tunnels.sh                      # webs de HDFS y YARN en localhost
 
 echo
-echo "Listo. El DNS del master cambia en cada arranque; para volver a verlo: ./nodes.sh"
-./nodes.sh
-echo "Webs de HDFS y YARN: ./tunnels.sh"
-echo "Siguiente, a mano: ./sync.sh y cargar los datos en el cliente ingest (ver el README)"
+echo "Siguiente, a mano: cargar los datos en el cliente ingest (README, paso 2)"

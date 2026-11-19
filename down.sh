@@ -1,25 +1,9 @@
 #!/usr/bin/env bash
-# Borra el clúster. Con --stop solo lo apaga.
+# Borrar las 6 instancias, con confirmación. Se pierden los datos de HDFS.
 set -euo pipefail
-NODES="hadoop-master,hadoop-worker-1,hadoop-worker-2,hadoop-worker-3,hadoop-client-ingest,hadoop-client-query"
+source "$(dirname "$0")/cluster/common.sh"
 
-# IDs de las instancias por estado
-ids() {
-  aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=$NODES" "Name=instance-state-name,Values=$1" \
-    --query "Reservations[].Instances[].InstanceId" --output text
-}
-
-# Apagar
-if [ "${1:-}" = --stop ]; then
-  running=$(ids running)
-  [ -z "$running" ] || aws ec2 stop-instances --instance-ids $running > /dev/null
-  echo "Apagando: $running"
-  exit 0
-fi
-
-# Borrar, con confirmación
-all=$(ids pending,running,stopping,stopped)
+all=$(ids "$NODES" $EXISTING)
 if [ -z "$all" ]; then
   echo "No hay instancias del clúster."
   exit 0

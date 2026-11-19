@@ -26,6 +26,8 @@ Preguntas analíticas con Spark sobre el CSV de Open Food Facts (≈ 4,9 M produ
 ```
 up.sh                 tu equipo: levanta todo (crea, enciende, configura y sube los datos)
 down.sh               tu equipo: borra todo (o --stop para solo apagar)
+nodes.sh              tu equipo: lista los nodos y el SSH de cada uno
+tunnels.sh            tu equipo: abre las webs de HDFS y YARN en localhost (stop para cerrarlas)
 run.sh                cliente: lanza un job de Spark en YARN
 cluster/master.sh     master: setup (SSH, /etc/hosts, YARN, carpetas de HDFS, clientes) | check
 cluster/client.sh     cliente: instala Java, Hadoop y Spark y fija su usuario de HDFS
@@ -76,6 +78,17 @@ Cuando Ansible termina, en EC2 hay 4 instancias `running` (master y 3 workers) c
 > [!NOTE]
 > La primera vez, Ansible tarda ≈ 15-20 min, casi todo en `Download Hadoop` (archive.apache.org limita la velocidad). Es una sola vez: con `./down.sh --stop` y `./up.sh` los nodos se reutilizan y no se descarga nada. No interrumpas Ansible a mitad.
 
+## Conectarse y ver las webs
+
+```bash
+./nodes.sh           # nodos encendidos, su IP privada y el comando SSH de cada uno
+./tunnels.sh         # HDFS y YARN en http://localhost:<puerto> (./tunnels.sh stop los cierra)
+```
+
+- El DNS del master cambia en cada arranque: `nodes.sh` siempre da el actual.
+- Los workers no tienen SSH desde fuera: se entra desde el master (`ssh hadoop-worker-1`).
+- Los clientes se pueden abrir directo con el comando de `nodes.sh`, o desde el master con `ssh hadoop-client-ingest` / `ssh hadoop-client-query`.
+
 ## Limpieza (cliente ingest)
 
 Desde el master: `ssh hadoop-client-ingest`.
@@ -110,3 +123,25 @@ hdfs dfs -get -f /results ./results && python3 query/plots.py   # PNG en figures
 En el master: `./open-food-facts-analytics/cluster/master.sh check` → procesos de cada nodo, `Live datanodes (3)`, `Total Nodes:3`, dueños de `/data` y `/results` y `Permission denied` cuando `query` intenta escribir en `/data`.
 
 Logs: los de cada job en `logs/` del cliente; los de los executors, `yarn logs -applicationId <id>`.
+
+## Comandos útiles
+
+En un **cliente** (actúas como `ingest` o `query`) salvo donde dice *master* (allí eres `ec2-user`, el superusuario de HDFS).
+
+| Para… | Comando |
+|---|---|
+| Ver carpetas y tamaños | `hdfs dfs -ls /data` · `hdfs dfs -du -h /data` · `hdfs dfs -df -h` |
+| Mirar un resultado | `hdfs dfs -cat /results/q05-*/part-*.csv \| head` |
+| Bajar un resultado a un archivo | `hdfs dfs -getmerge /results/q05-* q05.csv` |
+| Borrar (solo tu carpeta) | `hdfs dfs -rm -r /results/q05-*` |
+| Estado de HDFS, *master* | `hdfs dfsadmin -report \| head -20` (`Live datanodes (3)`) |
+| Salud de los bloques, *master* | `hdfs fsck /data \| tail -15` |
+| Nodos de YARN | `yarn node -list` |
+| Jobs en ejecución / todos | `yarn application -list` · `yarn application -list -appStates ALL` |
+| Logs de un job (executors) | `yarn logs -applicationId <id> \| less` |
+| Matar un job | `yarn application -kill <id>` |
+| Lanzar un job de Spark | `./run.sh query/q05-brands-by-pnns-group.py` (log en `logs/`) |
+| Procesos Java de un nodo | `jps` (master: NameNode, ResourceManager; worker: DataNode, NodeManager) |
+| Reiniciar un servicio, en el nodo | `sudo systemctl restart nodemanager` (también `datanode`, `namenode`, `resourcemanager`) |
+| Qué usuario soy en HDFS | `echo $HADOOP_USER_NAME` |
+| Instancias desde tu equipo | `aws ec2 describe-instances --filters "Name=tag:Name,Values=hadoop-*" --query "Reservations[].Instances[].[Tags[0].Value,State.Name]" --output text` |

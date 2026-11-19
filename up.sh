@@ -109,8 +109,6 @@ echo "== 5. Datos en HDFS (desde el cliente ingest)"
 $master "ssh hadoop-client-ingest 'bash open-food-facts-analytics/ingest/load.sh'"
 
 echo
-echo "Listo. El DNS del master cambia en cada arranque."
-echo "Master:  ssh -i $KEY ec2-user@$dns"
-echo "HDFS:    ssh -i $KEY -N -L 50070:$dns:50070 ec2-user@$dns   -> http://localhost:50070"
-echo "YARN:    ssh -i $KEY -N -L 8088:$dns:8088 ec2-user@$dns   -> http://localhost:8088/cluster/nodes"
-echo "Clientes: desde el master, ssh hadoop-client-ingest o ssh hadoop-client-query"
+echo "Listo. El DNS del master cambia en cada arranque; para volver a verlo: ./nodes.sh"
+./nodes.sh
+echo "Webs de HDFS y YARN: ./tunnels.sh"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# En el client: lanza un job. Uso: ./run.sh jobs/q01-nutriscore-by-category.py
+# En un cliente: lanza un job de Spark en YARN. Uso: ./run.sh query/q05-brands-by-pnns-group.py
 mkdir -p logs
 name=$(basename "$1" .py)
 echo "======== $name ========"

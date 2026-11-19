@@ -1,24 +1,28 @@
 #!/usr/bin/env bash
-# En el client: instala Java y Spark apuntando a YARN y HDFS.
+# En un cliente. Uso: bash cluster/client.sh ingest | query
+# Instala Java, Hadoop y Spark, y fija el usuario de HDFS del cliente.
 set -euo pipefail
-V=3.5.3
+ROLE=$1
 
-if [ -x /opt/spark/bin/spark-submit ]; then
-  echo "Spark ya instalado en el client"
+if [ -x ~/spark-3.5.5-bin-hadoop3/bin/spark-submit ]; then
+  echo "Hadoop y Spark ya instalados"
   exit 0
 fi
 
-sudo dnf install -y -q java-1.8.0-amazon-corretto-devel python3 wget tar
+# Java 8, el mismo que en el master y los workers
+sudo dnf install -y -q java-1.8.0-amazon-corretto-devel python3-pip
 
-# Descargar y descomprimir Spark
-[ -f /tmp/spark-$V.tgz ] || wget -q -O /tmp/spark-$V.tgz https://archive.apache.org/dist/spark/spark-$V/spark-$V-bin-hadoop3.tgz
-sudo rm -rf /opt/spark
-sudo mkdir /opt/spark
-sudo chown ec2-user: /opt/spark
-tar -xzf /tmp/spark-$V.tgz -C /opt/spark --strip-components=1
+# El cliente query dibuja las gráficas
+if [ "$ROLE" = query ]; then
+  pip3 install -q --user pandas matplotlib
+fi
 
-# Recursos: 3 executors de 3 GB, uno por worker
-cat > /opt/spark/conf/spark-defaults.conf <<'CONF'
+# Descomprimir lo que copió el master
+tar -xzf ~/hadoop-3.3.6.tar.gz -C ~
+tar -xzf ~/spark-3.5.5-bin-hadoop3.tgz -C ~
+
+# Spark en YARN: 3 executors (uno por worker) de 2 núcleos y 3 GB
+cat > ~/spark-3.5.5-bin-hadoop3/conf/spark-defaults.conf <<'CONF'
 spark.master                   yarn
 spark.submit.deployMode        client
 spark.driver.memory            2g
@@ -28,15 +32,13 @@ spark.executor.memory          3g
 spark.executor.memoryOverhead  512m
 CONF
 
-# Variables de entorno
-VARS='export JAVA_HOME=/usr/lib/jvm/java-1.8.0-amazon-corretto
-export SPARK_HOME=/opt/spark
-export HADOOP_CONF_DIR=$HOME/hadoop_conf
-export YARN_CONF_DIR=$HOME/hadoop_conf
-export PATH=$PATH:/opt/spark/bin'
-grep -q SPARK_HOME ~/.bashrc || echo "$VARS" >> ~/.bashrc
-eval "$VARS"
-
-# Probar con SparkPi
-spark-submit /opt/spark/examples/src/main/python/pi.py 10 2> /dev/null
-echo "Esperado: Pi is roughly 3.14"
+# Variables de entorno. HADOOP_USER_NAME es el usuario con el que el cliente entra a HDFS
+cat >> ~/.bashrc <<VARS
+export JAVA_HOME=/usr/lib/jvm/java
+export HADOOP_HOME=\$HOME/hadoop-3.3.6
+export HADOOP_CONF_DIR=\$HADOOP_HOME/etc/hadoop
+export SPARK_HOME=\$HOME/spark-3.5.5-bin-hadoop3
+export PATH=\$PATH:\$HADOOP_HOME/bin:\$SPARK_HOME/bin
+export HADOOP_USER_NAME=$ROLE
+VARS
+echo "Cliente $ROLE instalado"

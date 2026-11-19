@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Borra el clúster. Con --stop solo lo apaga.
 set -euo pipefail
-NODES="hadoop-master,hadoop-worker-1,hadoop-worker-2,hadoop-worker-3,hadoop-client"
+NODES="hadoop-master,hadoop-worker-1,hadoop-worker-2,hadoop-worker-3,hadoop-client-ingest,hadoop-client-query"
 
 # IDs de las instancias por estado
 ids() {

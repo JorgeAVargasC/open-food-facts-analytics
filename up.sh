@@ -5,7 +5,8 @@ cd "$(dirname "$0")"
 
 KEY=~/.ssh/vockey.pem
 OPTS="-i $KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ServerAliveInterval=30"
-NODES="hadoop-master,hadoop-worker-1,hadoop-worker-2,hadoop-worker-3,hadoop-client"
+CLIENTS="ingest query"
+NODES="hadoop-master,hadoop-worker-1,hadoop-worker-2,hadoop-worker-3,hadoop-client-ingest,hadoop-client-query"
 EXISTING="pending,running,stopping,stopped"
 
 # IDs de las instancias por nombre y estado
@@ -49,40 +50,47 @@ if [ -z "$(ids hadoop-master $EXISTING)" ]; then
   (cd ~/hadoop-ansible-ec2 && ansible-playbook -i inventory.aws_ec2.yml --key-file $KEY --user ec2-user create-instances.yml)
 fi
 
-echo "== 3. SSH y client"
+echo "== 3. SSH y clientes (ingest y query)"
 aws ec2 authorize-security-group-ingress --group-name hadoop-master-sg \
   --protocol tcp --port 22 --cidr 0.0.0.0/0 > /dev/null 2>&1 || true   # SSH abierto a cualquier IP
-if [ -z "$(ids hadoop-client $EXISTING)" ]; then
-  aws ec2 run-instances \
-    --image-id ami-066784287e358dad1 --instance-type t2.large --key-name vockey \
-    --security-groups hadoop-sg hadoop-master-sg \
-    --block-device-mappings "DeviceName=/dev/xvda,Ebs={VolumeSize=50,DeleteOnTermination=true}" \
-    --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=hadoop-client},{Key=Group,Value=hadoop-client}]" \
-    > /dev/null
-fi
+for role in $CLIENTS; do
+  if [ -z "$(ids hadoop-client-$role $EXISTING)" ]; then
+    # Misma AMI que el master: mismo Java y mismo Python que en los workers
+    aws ec2 run-instances \
+      --image-id "$(info hadoop-master ImageId)" --instance-type t2.large --key-name vockey \
+      --security-groups hadoop-sg hadoop-master-sg \
+      --block-device-mappings "DeviceName=/dev/xvda,Ebs={VolumeSize=50,DeleteOnTermination=true}" \
+      --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=hadoop-client-$role},{Key=Group,Value=hadoop-client}]" \
+      > /dev/null
+  fi
+done
 
 # Encender lo apagado y esperar a que todo acepte SSH
 stopped=$(ids "$NODES" stopped)
 [ -z "$stopped" ] || aws ec2 start-instances --instance-ids $stopped > /dev/null
-echo "Esperando a que las 5 instancias estén listas..."
+echo "Esperando a que las 6 instancias estén listas..."
 aws ec2 wait instance-status-ok --instance-ids $(ids "$NODES" pending,running)
 
 echo "== 4. Configuración"
 dns=$(info hadoop-master PublicDnsName)
 master="ssh $OPTS ec2-user@$dns"
-export COPYFILE_DISABLE=1   # Mac: sin archivos ._*
 $master "rm -rf open-food-facts-analytics && mkdir open-food-facts-analytics"
-tar -cf - run.sh jobs cluster \
-  | $master "tar -C open-food-facts-analytics -xf - && echo $(info hadoop-client PrivateIpAddress) > open-food-facts-analytics/client-ip.txt"
+tar -cf - run.sh cluster ingest query | $master "tar -C open-food-facts-analytics -xf -"
+
+# IPs privadas de los clientes, para el /etc/hosts del master
+for role in $CLIENTS; do
+  echo "$(info hadoop-client-$role PrivateIpAddress)  hadoop-client-$role"
+done | $master "cat > open-food-facts-analytics/clients-hosts.txt"
+
 scp $OPTS -q $KEY ec2-user@"$dns":.ssh/vockey.pem   # el master entra en los demás nodos con ella
 $master "cd open-food-facts-analytics && ./cluster/master.sh setup"
 
-echo "== 5. Datos en HDFS"
-$master "cd open-food-facts-analytics && ./cluster/master.sh data"
+echo "== 5. Datos en HDFS (desde el cliente ingest)"
+$master "ssh hadoop-client-ingest 'bash open-food-facts-analytics/ingest/load.sh'"
 
 echo
 echo "Listo. El DNS del master cambia en cada arranque."
 echo "Master:  ssh -i $KEY ec2-user@$dns"
 echo "HDFS:    ssh -i $KEY -N -L 50070:$dns:50070 ec2-user@$dns   -> http://localhost:50070"
 echo "YARN:    ssh -i $KEY -N -L 8088:$dns:8088 ec2-user@$dns   -> http://localhost:8088/cluster/nodes"
-echo "Jobs:    desde el master, ssh hadoop-client y cd open-food-facts-analytics"
+echo "Clientes: desde el master, ssh hadoop-client-ingest o ssh hadoop-client-query"

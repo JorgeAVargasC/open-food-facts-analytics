@@ -1,63 +1,70 @@
 # Open Food Facts analytics
 
-Preguntas analíticas con Spark sobre el CSV de Open Food Facts, en un clúster Hadoop en AWS Academy (Ansible de clase + nuestros scripts).
+**Jorge Andrés Vargas Cordoba** · MUCSI, Universidad de Deusto (2026-27) · Big Data
+
+Preguntas analíticas con Spark sobre el CSV de Open Food Facts (≈ 4,9 M productos, 13 GB), en un clúster Hadoop en AWS Academy (Ansible de clase + nuestros scripts).
+
+## Arquitectura
+
+| Nodo | Procesos | Qué hace |
+|---|---|---|
+| `hadoop-master` | NameNode, ResourceManager | Coordina HDFS y YARN. No ejecuta trabajos |
+| `hadoop-worker-1/2/3` | DataNode, NodeManager | Guardan los bloques (3 réplicas) y ejecutan los executors de Spark (6 GB cada uno) |
+| `hadoop-client-ingest` | driver de Spark | Sube el CSV a HDFS y lanza la limpieza. Usuario de HDFS `ingest` |
+| `hadoop-client-query` | driver de Spark | Lanza las preguntas y dibuja las gráficas. Usuario de HDFS `query` |
+
+| Ruta en HDFS | Dueño | Contenido |
+|---|---|---|
+| `/data/raw` | ingest | `openfoodfacts.csv` y `sample.csv` (2 %) |
+| `/data/clean/products` | ingest | Parquet limpio |
+| `/results/qNN-…` | query | Un CSV por pregunta |
+
+`query` puede leer `/data` pero no escribir en ella (permisos 755). No lanzar a la vez trabajos de los dos clientes: comparten los 18 GB de YARN.
+
+## Archivos
 
 ```
-up.sh                        tu equipo: levanta todo (crea, enciende, configura y sube los datos)
-down.sh                      tu equipo: borra todo (o --stop para solo apagar)
-run.sh                       client: lanza un job de Spark en YARN
-cluster/master.sh            master: configurar el clúster, subir los datos, comprobarlo (lo lanza up.sh)
-cluster/client.sh            client: instalar Spark (lo lanza master.sh setup)
-cluster/worker-yarn-site.xml YARN de los workers: 6 GB por nodo
-jobs/                        00-etl.py (CSV → Parquet) y una pregunta por archivo (qNN-*.py)
+up.sh                 tu equipo: levanta todo (crea, enciende, configura y sube los datos)
+down.sh               tu equipo: borra todo (o --stop para solo apagar)
+run.sh                cliente: lanza un job de Spark en YARN
+cluster/master.sh     master: setup (SSH, /etc/hosts, YARN, carpetas de HDFS, clientes) | check
+cluster/client.sh     cliente: instala Java, Hadoop y Spark y fija su usuario de HDFS
+cluster/worker-yarn-site.xml   YARN de los workers: 6 GB por nodo
+ingest/load.sh        cliente ingest: descarga el CSV y lo sube a HDFS
+ingest/clean.py       cliente ingest: CSV → Parquet limpio
+query/q05…q08.py      cliente query: una pregunta por archivo
+query/plots.py        cliente query: gráficas de las preguntas
 ```
 
-## Requisitos
+## Preparar tu equipo
 
-- Windows: **WSL** (Ubuntu). Mac: **Terminal**. Con `git`, `python3` y [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions). En WSL: `sudo apt install -y git python3-venv libffi-dev unzip`.
-- Learner Lab arrancado y `labsuser.pem` descargado (AWS Details, Download PEM).
-- Si un script da `Permission denied`: `chmod +x *.sh cluster/*.sh`.
+- Windows: **WSL** (Ubuntu) con `sudo apt install -y git python3-venv libffi-dev unzip` y [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+- Una vez: `mkdir -p ~/.ssh ~/.aws && cp ~/Downloads/labsuser.pem ~/.ssh/vockey.pem && chmod 600 ~/.ssh/vockey.pem` (el PEM sale de AWS Details, Download PEM).
+- En cada sesión: Learner Lab, **Start Lab**, AWS Details, AWS CLI, **Show**, y pegarlo en `~/.aws/credentials` (cambia cada vez).
 
----
+  ![Learner Lab: Start Lab, AWS Details y credenciales de AWS CLI](docs/assets/learner-lab-credentials.png)
 
-## Uso
+- Si un script da `Permission denied`: `chmod +x *.sh cluster/*.sh ingest/*.sh`.
 
-### Preparar tu equipo (una vez)
+## Levantar y apagar
 
 ```bash
-mkdir -p ~/.ssh ~/.aws
-cp ~/Downloads/labsuser.pem ~/.ssh/vockey.pem && chmod 600 ~/.ssh/vockey.pem
-```
-
-En cada sesión del Learner Lab las credenciales cambian: pegar AWS Details, AWS CLI, Show en `~/.aws/credentials` (`nano ~/.aws/credentials`).
-
-### Levantar y destruir
-
-```bash
-./up.sh              # la primera vez ~1 h; en las siguientes sesiones, unos minutos
+./up.sh              # la primera vez ~1 h; después, unos minutos
 ./down.sh --stop     # al acabar la sesión: apaga, HDFS conserva los datos
-./down.sh            # al acabar el trabajo: borra las 5 instancias y HDFS
+./down.sh            # al acabar el trabajo: borra las 6 instancias
 ```
 
-`up.sh` se puede relanzar siempre: crea lo que falta, enciende lo apagado y se salta lo ya hecho. Al final imprime el comando ssh del master y los túneles de las webs de HDFS y YARN (cada túnel en su propia terminal).
+`up.sh` se puede relanzar: crea lo que falta, enciende lo apagado y se salta lo hecho. Hace, en orden:
 
-Lo que hace, en orden:
+1. Ansible de clase (`memaldi/hadoop-ansible-ec2`): master y 3 workers con HDFS y YARN. Solo si no hay master (formatea HDFS).
+2. Los dos clientes, con la misma AMI que el master.
+3. `cluster/master.sh setup` en el master. Termina con dos SparkPi (uno por cliente) y el `check`.
+4. `ingest/load.sh` en el cliente ingest: el CSV a HDFS (~15 min).
 
-1. **Ansible**: entorno `~/ansible` y playbook de clase (`memaldi/hadoop-ansible-ec2`). Solo la primera vez.
-2. **Master y 3 workers** con HDFS, YARN y Spark (~15-40 min). Solo si no hay master: el playbook formatea HDFS. Si ya existen y están apagados, los enciende.
-3. **SSH y client**: abre el puerto 22 del master a cualquier IP (Ansible solo deja la tuya) y crea `hadoop-client`.
-4. **Configuración** (`cluster/master.sh setup`, en el master):
-   - `~/.ssh/config` para entrar a cualquier nodo con `ssh hadoop-worker-1`.
-   - `hadoop-client` en el `/etc/hosts` del master. El client recibe ese `/etc/hosts` sin su propia línea. Los workers no se tocan.
-   - `worker-yarn-site.xml` en los workers: YARN da 6 de sus 8 GB (por defecto anuncia 8 GB, más de lo que puede dar una t3.large).
-   - En el client: los jobs, la dirección de HDFS y YARN (`core-site.xml` y `yarn-site.xml` del master), Java 8, Spark 3.5.3 y una prueba con SparkPi.
-   - Comprobación (`master.sh check`): `Live datanodes (3)`, `Total Nodes:3` y 3 veces `<memory:6144, vCores:2>`.
-5. **Datos**: descarga el CSV (~13 G) a `/data/raw/openfoodfacts.csv` en HDFS (39 G con las 3 réplicas por defecto) y crea `muestra.csv` con el 2 % de las filas (~15 min).
-
-> **Por qué el client no lleva `hadoop-client` en su `/etc/hosts`.** En modo client, el ApplicationMaster y los executors (en los workers) se conectan al driver (en el client) con el nombre que este anuncia. Sin esa línea, Spark se anuncia con el nombre interno de EC2 (`ip-172-31-x-x.ec2.internal`), que los workers resuelven con el DNS de la VPC. Con ella se anunciaría como `hadoop-client`, que los workers no conocen, y fallaría con `UnknownHostException: hadoop-client`.
+Al final imprime el `ssh` del master y los túneles de las webs de HDFS (50070) y YARN (8088).
 
 > [!WARNING]
-> Si Ansible falla o se queda parado en `Download Spark` (10-35 min sin mostrar progreso), Ctrl+C. Si el master ya tiene `~/spark-3.5.5-bin-hadoop3.tgz` (383 MB), seguir desde la tarea siguiente y relanzar `up.sh`:
+> Si Ansible se queda parado en `Download Spark` más de 35 min: Ctrl+C y, si el master ya tiene `~/spark-3.5.5-bin-hadoop3.tgz` (383 MB), seguir desde la tarea siguiente y relanzar `up.sh`:
 >
 > ```bash
 > source ~/ansible/bin/activate && cd ~/hadoop-ansible-ec2
@@ -65,38 +72,38 @@ Lo que hace, en orden:
 >   create-instances.yml --start-at-task "Extract Spark"
 > cd - && ./up.sh
 > ```
->
-> ![Descarga de Spark en curso](docs/assets/step-01-download-spark.png)
 
-> [!NOTE]
-> Si se corta la conexión durante la subida del CSV, la subida se para: relanzar `./up.sh` la empieza de nuevo.
+## Limpieza (cliente ingest)
 
-Capturas de cada parte:
-
-![Instancias en EC2](docs/assets/step-01-ec2-instances.png)
-![Grupos de seguridad](docs/assets/step-01-security-groups.png)
-![Regla SSH abierta](docs/assets/step-02-ssh-rule.png)
-![Client](docs/assets/step-04-client-instance.png)
-![DataNodes en la web de HDFS](docs/assets/step-03-hdfs-datanodes.png)
-![Nodos de YARN antes de la configuración](docs/assets/step-07-yarn-nodes-before.png)
-![Nodos de YARN con 6 GB](docs/assets/step-07-yarn-nodes-after.png)
-![SparkPi en YARN](docs/assets/step-08-sparkpi.png)
-![CSV en HDFS](docs/assets/step-09-hdfs-raw.png)
-
-### ETL y preguntas
-
-Entrar al master con el comando que imprime `up.sh`, y desde ahí al client:
+Desde el master: `ssh hadoop-client-ingest`.
 
 ```bash
-ssh hadoop-client
 cd open-food-facts-analytics
-./run.sh jobs/00-etl.py hdfs:///data/raw/muestra.csv   # primero con la muestra (~99.000 filas)
-./run.sh jobs/00-etl.py                                # después el CSV completo (~4,88 M filas)
-for f in jobs/q*.py; do ./run.sh "$f"; done            # las preguntas
+./run.sh ingest/clean.py hdfs:///data/raw/sample.csv   # prueba con la muestra (~1 min)
+./run.sh ingest/clean.py                               # CSV completo
 ```
 
-El ETL guarda el Parquet en `/data/clean/products` e imprime cuántos productos tienen cada dato. Cada pregunta deja su CSV en `/results/qNN-...`. Para comprobar el clúster en cualquier momento, en el master: `./cluster/master.sh check`.
+Imprime las filas leídas, los productos limpios, los incoherentes y cuántos productos tienen cada dato.
 
-![ETL con la muestra](docs/assets/step-10-etl-sample.png)
-![ETL con el CSV completo](docs/assets/step-10-etl-full.png)
-![Resultados en HDFS](docs/assets/step-11-results.png)
+## Preguntas (cliente query)
+
+Desde el master: `ssh hadoop-client-query`.
+
+```bash
+cd open-food-facts-analytics
+for f in query/q0*.py; do ./run.sh "$f"; done
+hdfs dfs -get -f /results ./results && python3 query/plots.py   # PNG en figures/
+```
+
+| # | Pregunta | Técnica Spark |
+|---|---|---|
+| 5 | Las 5 marcas con la media más baja y más alta de azúcar, grasa saturada y sal, en cada grupo PNNS | `explode` + `groupBy` + `Window` con `row_number` |
+| 6 | Productos añadidos por año, % con energía y macronutrientes y crecimiento anual | `groupBy` + `Window` con `lag` |
+| 7 | % de productos con la energía declarada a más del 20 % de la calculada (4·carb. + 4·prot. + 9·grasa), por país | columna calculada + `explode` + `groupBy` |
+| 8 | % que cumple «fuente de» y «alto contenido de» proteínas y fibra (Reglamento UE 1924/2006), por grupo PNNS | `when` por umbral + `groupBy` |
+
+## Comprobar el clúster
+
+En el master: `./open-food-facts-analytics/cluster/master.sh check` → procesos de cada nodo, `Live datanodes (3)`, `Total Nodes:3`, dueños de `/data` y `/results` y `Permission denied` cuando `query` intenta escribir en `/data`.
+
+Logs: los de cada job en `logs/` del cliente; los de los executors, `yarn logs -applicationId <id>`.

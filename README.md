@@ -65,6 +65,14 @@ query/plots.py        cliente query: gráficas de las preguntas
 
 Al final imprime el `ssh` del master y los túneles de las webs de HDFS (50070) y YARN (8088).
 
+Si va bien, tras `== 2. Master y workers` salen las tareas de Ansible (15–40 min). No interrumpirlo:
+
+![up.sh con Ansible creando el master](docs/assets/up-ansible-running.png)
+
+Cuando Ansible termina, en EC2 hay 4 instancias `running` (master y 3 workers) con los 3 *status checks* en verde:
+
+![Master y workers en EC2](docs/assets/ec2-instances-ansible.png)
+
 > [!WARNING]
 > Si Ansible se queda parado en `Download Spark` más de 35 min: Ctrl+C y, si el master ya tiene `~/spark-3.5.5-bin-hadoop3.tgz` (383 MB), seguir desde la tarea siguiente y relanzar `up.sh`:
 >

@@ -52,6 +52,17 @@ echo "== 2. Master y workers"
 if [ -z "$(ids hadoop-master $EXISTING)" ]; then
   export ANSIBLE_SSH_ARGS="-o ServerAliveInterval=30 -o ControlMaster=auto -o ControlPersist=60s"   # que no se corte el SSH
   source ~/ansible/bin/activate
+  # El inventario de clase toma TODAS las instancias de la cuenta; limitarlo a los nodos de este proyecto
+  cat > ~/hadoop-ansible-ec2/inventory.aws_ec2.yml <<'INV'
+plugin: amazon.aws.aws_ec2
+regions: [us-east-1]
+filters:
+  tag:Group: [hadoop-master, hadoop-worker]
+  instance-state-name: running
+keyed_groups:
+  - prefix: tag
+    key: tags
+INV
   (cd ~/hadoop-ansible-ec2 && ansible-playbook -i inventory.aws_ec2.yml --key-file $KEY --user ec2-user create-instances.yml)
 fi
 

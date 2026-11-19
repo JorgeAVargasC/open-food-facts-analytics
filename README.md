@@ -26,6 +26,7 @@ Preguntas analíticas con Spark sobre el CSV de Open Food Facts (≈ 4,9 M produ
 ```
 up.sh                 tu equipo: levanta el clúster (crea, enciende y configura)
 sync.sh               tu equipo: copia ingest/ o query/ a cada cliente
+fetch.sh              tu equipo: trae las gráficas del cliente query a figures/
 down.sh               tu equipo: borra todo (o --stop para solo apagar)
 nodes.sh              tu equipo: lista los nodos y el SSH de cada uno
 tunnels.sh            tu equipo: abre las webs de HDFS y YARN en localhost (stop para cerrarlas)
@@ -177,6 +178,23 @@ Una a una, o las cuatro seguidas: `for f in query/q0*.py; do spark-submit "$f"; 
 ```bash
 hdfs dfs -get -f /results ./results && python3 query/plots.py   # PNG en figures/
 ```
+
+Para traer las gráficas al repo, desde tu equipo: `./fetch.sh` (las deja en `figures/`, que sí se sube a Git).
+
+Resultado en la web de YARN: la limpieza (`ingest`) y las cuatro preguntas (`query`), todas `FINISHED` / `SUCCEEDED`.
+
+![YARN: limpieza y preguntas terminadas](docs/assets/yarn-all-jobs-finished.png)
+
+| Job | Usuario | Duración |
+|---|---|---|
+| Limpieza de la muestra | `ingest` | 50 s |
+| Limpieza completa (13 GB) | `ingest` | 2 min 31 s |
+| q05 marcas por grupo PNNS | `query` | 48 s |
+| q06 evolución por año | `query` | 38 s |
+| q07 coherencia energética por país | `query` | 42 s |
+| q08 proteínas y fibra | `query` | 40 s |
+
+Las consultas leen un Parquet de ~119 MB: buena parte de esos ~40 s es el arranque de Spark en YARN.
 
 | # | Pregunta | Técnica Spark |
 |---|---|---|

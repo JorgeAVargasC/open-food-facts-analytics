@@ -27,6 +27,7 @@ Preguntas analíticas con Spark sobre el CSV de Open Food Facts (≈ 4,9 M produ
 up.sh                 tu equipo: levanta el clúster (crea, enciende y configura)
 sync.sh               tu equipo: copia ingest/ o query/ a cada cliente
 fetch.sh              tu equipo: trae las gráficas del cliente query a figures/
+fetch-results.sh      tu equipo: trae los CSV de resultados de HDFS a results/
 down.sh               tu equipo: borra todo (o --stop para solo apagar)
 nodes.sh              tu equipo: lista los nodos y el SSH de cada uno
 tunnels.sh            tu equipo: abre las webs de HDFS y YARN en localhost (stop para cerrarlas)
@@ -179,7 +180,14 @@ Una a una, o las cuatro seguidas: `for f in query/q0*.py; do spark-submit "$f"; 
 hdfs dfs -get -f /results ./results && python3 query/plots.py   # PNG en figures/
 ```
 
-Para traer las gráficas al repo, desde tu equipo: `./fetch.sh` (las deja en `figures/`, que sí se sube a Git).
+Para traer los resultados al repo, desde tu equipo:
+
+```bash
+./fetch.sh            # gráficas → figures/*.png
+./fetch-results.sh    # un CSV por pregunta → results/q05-brands-by-pnns-group.csv, etc.
+```
+
+Ambas carpetas se suben a Git.
 
 Resultado en la web de YARN: la limpieza (`ingest`) y las cuatro preguntas (`query`), todas `FINISHED` / `SUCCEEDED`.
 

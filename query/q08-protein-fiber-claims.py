@@ -2,7 +2,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-spark = SparkSession.builder.appName("off-q08").getOrCreate()
+spark = SparkSession.builder.appName("q08-protein-fiber-claims").getOrCreate()
 df = spark.read.parquet("hdfs:///data/clean/products").where(~F.col("nutrients_inconsistent"))
 
 energy = F.col("energy_kcal_100g")

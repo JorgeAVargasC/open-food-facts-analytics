@@ -150,9 +150,31 @@ Imprime las filas leídas, los productos limpios, los incoherentes y cuántos pr
 
 Entrar con el comando de `./nodes.sh` (`hadoop-client-query`). Solo después de que acabe la limpieza completa.
 
+**Una pregunta, paso a paso (la 5):**
+
 ```bash
 cd open-food-facts-analytics
-for f in query/q0*.py; do spark-submit "$f"; done
+spark-submit query/q05-brands-by-pnns-group.py
+```
+
+`spark-submit` toma la configuración de `spark-defaults.conf` (YARN, 3 executors), lee el Parquet de `/data/clean/products`, imprime el conteo de productos y escribe el resultado como un CSV en HDFS. Para comprobarlo:
+
+```bash
+hdfs dfs -ls /results/q05-brands-by-pnns-group                      # _SUCCESS y un part-*.csv
+hdfs dfs -cat /results/q05-brands-by-pnns-group/part-*.csv | head   # las primeras filas
+```
+
+**Las otras tres son lo mismo, cambiando el archivo** (y la carpeta de resultados):
+
+```bash
+spark-submit query/q06-yearly-data-quality.py
+spark-submit query/q07-energy-coherence-by-country.py
+spark-submit query/q08-protein-fiber-claims.py
+```
+
+Una a una, o las cuatro seguidas: `for f in query/q0*.py; do spark-submit "$f"; done`. Después, las gráficas:
+
+```bash
 hdfs dfs -get -f /results ./results && python3 query/plots.py   # PNG en figures/
 ```
 

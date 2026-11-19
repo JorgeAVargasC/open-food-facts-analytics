@@ -6,7 +6,7 @@ MAX_DIFF = 0.20       # diferencia máxima: 20 % de la energía declarada
 MIN_DIFF_KCAL = 10    # y al menos 10 kcal, para no marcar agua o refrescos zero por 1 o 2 kcal
 MIN_PRODUCTS = 1000   # países con menos productos no entran
 
-spark = SparkSession.builder.appName("off-q07").getOrCreate()
+spark = SparkSession.builder.appName("q07-energy-coherence-by-country").getOrCreate()
 df = spark.read.parquet("hdfs:///data/clean/products")
 
 # Productos con energía (> 0) y los tres macronutrientes.

@@ -8,7 +8,7 @@ MIN_PRODUCTS = 20   # productos de la marca dentro del grupo; con 20, todos los 
 TOP = 5
 NUTRIENTS = ["sugars_100g", "saturated_fat_100g", "salt_100g"]
 
-spark = SparkSession.builder.appName("off-q05").getOrCreate()
+spark = SparkSession.builder.appName("q05-brands-by-pnns-group").getOrCreate()
 df = spark.read.parquet("hdfs:///data/clean/products")
 
 # Productos con grupo, marca y los tres nutrientes, sin incoherencias

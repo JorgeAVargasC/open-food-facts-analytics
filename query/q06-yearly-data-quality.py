@@ -4,7 +4,7 @@ from pyspark.sql import functions as F
 
 NUTRIENTS = ["energy_kcal_100g", "fat_100g", "carbohydrates_100g", "proteins_100g"]
 
-spark = SparkSession.builder.appName("off-q06").getOrCreate()
+spark = SparkSession.builder.appName("q06-yearly-data-quality").getOrCreate()
 df = spark.read.parquet("hdfs:///data/clean/products")
 
 

@@ -8,7 +8,7 @@ from pyspark.sql import functions as F
 INPUT = sys.argv[1] if len(sys.argv) > 1 else "hdfs:///data/raw/openfoodfacts.csv"
 OUTPUT = "hdfs:///data/clean/products"
 
-spark = SparkSession.builder.appName("off-clean").getOrCreate()
+spark = SparkSession.builder.appName("clean-products").getOrCreate()
 spark.conf.set("spark.sql.session.timeZone", "UTC")  # años de alta en UTC
 
 # Leer el CSV (tabuladores, todo texto, sin comillas)

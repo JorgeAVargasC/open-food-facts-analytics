@@ -43,6 +43,8 @@ query/plots.py        cliente query: gráficas de las preguntas
 - En cada sesión: Learner Lab, **Start Lab**, AWS Details, AWS CLI, **Show**, y pegarlo en `~/.aws/credentials` (cambia cada vez).
 
   ![Learner Lab: Start Lab, AWS Details y credenciales de AWS CLI](docs/assets/learner-lab-credentials.png)
+  ![~/.aws/credentials actualizado](docs/assets/aws-credentials-file.png)
+  ![Credenciales pegadas con nano](docs/assets/aws-credentials-nano.png)
 
 - Si un script da `Permission denied`: `chmod +x *.sh cluster/*.sh ingest/*.sh`.
 

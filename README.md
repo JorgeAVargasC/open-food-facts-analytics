@@ -54,6 +54,7 @@ Todos los `.sh` se ejecutan en tu equipo; los pasos que actúan en el master o e
 
 - Windows: **WSL** (Ubuntu) con `sudo apt install -y git python3-venv libffi-dev unzip python3-pandas python3-matplotlib` y [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 - Clave: `mkdir -p ~/.ssh ~/.aws && cp ~/Downloads/labsuser.pem ~/.ssh/vockey.pem && chmod 600 ~/.ssh/vockey.pem` (AWS Details → Download PEM).
+- Permisos de ejecución de los scripts (desde la raíz del repo): `chmod +x *.sh cluster/*.sh`.
 - En cada sesión: Learner Lab → **Start Lab** → AWS Details → AWS CLI **Show** → pegar en `~/.aws/credentials`.
 
   ![Learner Lab: credenciales de AWS CLI](docs/assets/learner-lab-credentials.png)

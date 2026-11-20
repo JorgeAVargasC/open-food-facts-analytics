@@ -50,76 +50,37 @@ Todos los `.sh` se ejecutan en tu equipo; los pasos que actúan en el master o e
 
 ## Uso
 
-### 0. Preparar tu equipo (una vez)
+Paso a paso con capturas de una ejecución completa: [docs/step-by-step.md](docs/step-by-step.md).
 
-- Windows: **WSL** (Ubuntu) con `sudo apt install -y git python3-venv libffi-dev unzip python3-pandas python3-matplotlib` y [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
-- Clave: `mkdir -p ~/.ssh ~/.aws && cp ~/Downloads/labsuser.pem ~/.ssh/vockey.pem && chmod 600 ~/.ssh/vockey.pem` (AWS Details → Download PEM).
-- Permisos de ejecución de los scripts (desde la raíz del repo): `chmod +x *.sh cluster/*.sh`.
-- En cada sesión: Learner Lab → **Start Lab** → AWS Details → AWS CLI **Show** → pegar en `~/.aws/credentials`.
-
-  ![Learner Lab: credenciales de AWS CLI](docs/assets/learner-lab-credentials.png)
-
-### 1. Levantar el clúster
+**Una vez:** WSL con `sudo apt install -y git python3-venv libffi-dev unzip python3-pandas python3-matplotlib`, [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) y `cp ~/Downloads/labsuser.pem ~/.ssh/vockey.pem && chmod 600 ~/.ssh/vockey.pem`. **En cada sesión:** credenciales del Learner Lab en `~/.aws/credentials`.
 
 ```bash
-./up.sh            # la primera vez ~30 min (Ansible); después, unos minutos
+./up.sh                 # clúster listo (~30 min la primera vez), con nodos y webs
 ```
 
-Ejecuta en orden `cluster/01…09`, copia el código a los clientes, lista los nodos y abre las webs de HDFS y YARN. Se puede relanzar, y cada paso también suelto (`bash cluster/09-check.sh`). No interrumpir Ansible a mitad.
+Cliente ingest (SSH de `./nodes.sh`):
 
 ```bash
-./nodes.sh         # nodos y comando SSH (el DNS cambia en cada arranque)
-./tunnels.sh       # reabrir las webs de HDFS y YARN (./tunnels.sh stop las cierra)
-```
-
-Los clientes y el master aceptan SSH directo; los workers, solo desde el master (`ssh hadoop-worker-1`).
-
-### 2. Cargar los datos (cliente ingest)
-
-```bash
-# CSV directo a HDFS, sin pasar por el disco (~15 min). El "-" de put lee de la entrada estándar
 curl -sL https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz \
   | gunzip | hdfs dfs -put -f - /data/raw/openfoodfacts.csv
-
-# Muestra al azar del 2 %, para probar la limpieza
-hdfs dfs -cat /data/raw/openfoodfacts.csv \
-  | awk 'NR == 1 || rand() < 0.02' | hdfs dfs -put -f - /data/raw/sample.csv
-
-hdfs dfs -ls -h /data/raw     # ~13 G y ~270 M, dueño ingest
+hdfs dfs -cat /data/raw/openfoodfacts.csv | awk 'NR == 1 || rand() < 0.02' | hdfs dfs -put -f - /data/raw/sample.csv
+cd open-food-facts-analytics
+spark-submit ingest/clean-products.py hdfs:///data/raw/sample.csv   # prueba
+nohup spark-submit ingest/clean-products.py > clean.out 2>&1 &      # completo
 ```
 
-### 3. Limpiar (cliente ingest)
+Cliente query, después de la limpieza:
 
 ```bash
 cd open-food-facts-analytics
-spark-submit ingest/clean-products.py hdfs:///data/raw/sample.csv   # prueba (~1 min)
-nohup spark-submit ingest/clean-products.py > clean.out 2>&1 &      # completo (~3 min), sobrevive a un corte de SSH
-tail -f clean.out
-hdfs dfs -du -s -h /data/clean/products                             # ~119 MB de Parquet
+spark-submit query/q05-brands-by-pnns-group.py   # igual con q06, q07, q08
 ```
 
-### 4. Preguntas (cliente query)
+Tu equipo:
 
 ```bash
-cd open-food-facts-analytics
-spark-submit query/q05-brands-by-pnns-group.py
-hdfs dfs -cat /results/q05-brands-by-pnns-group/part-*.csv | head
-```
-
-Las otras tres, igual cambiando el archivo (`q06-…`, `q07-…`, `q08-…`).
-
-### 5. Resultados a tu equipo
-
-```bash
-./pull.sh             # HDFS → results/*.csv
-python3 plot-results.py       # results/*.csv → results/*.png (no necesita el clúster)
-```
-
-### 6. Apagar
-
-```bash
-./stop.sh             # al acabar la sesión: apaga, HDFS conserva los datos
-./down.sh             # al acabar el trabajo: borra las 6 instancias
+./pull.sh && python3 plot-results.py   # results/*.csv y *.png
+./stop.sh                              # apagar (HDFS conserva los datos); ./down.sh borra
 ```
 
 ## Resultados
@@ -170,16 +131,3 @@ Las preguntas leen ~119 MB de Parquet: buena parte de esos ~40 s es el arranque 
 | Progreso real de un job | `ssh -i ~/.ssh/vockey.pem -N -L 4040:localhost:4040 ec2-user@<cliente>` → `localhost:4040` | tu equipo |
 | Procesos Java | `jps` | cada nodo |
 | Reiniciar un servicio | `sudo systemctl restart nodemanager` (o `datanode`, `namenode`, `resourcemanager`) | el nodo |
-
-<details>
-<summary>Capturas del despliegue</summary>
-
-![~/.aws/credentials](docs/assets/aws-credentials-file.png)
-![Ansible creando el master](docs/assets/up-ansible-running.png)
-![Las 6 instancias en EC2](docs/assets/ec2-six-instances-running.png)
-![hdfs dfs -ls -h /data/raw](docs/assets/hdfs-ls-data-raw.png)
-![Web de HDFS: /data/raw](docs/assets/hdfs-web-data-raw.png)
-![YARN: limpieza en ejecución (13 GB asignados = 3 executors × 4 GB + 1 GB del application master)](docs/assets/yarn-clean-running.png)
-![YARN: limpieza y preguntas terminadas](docs/assets/yarn-all-jobs-finished.png)
-
-</details>

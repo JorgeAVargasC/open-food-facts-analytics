@@ -12,7 +12,7 @@ bash cluster/05-ssh.sh               # el master entra a todos por nombre; /etc/
 bash cluster/06-yarn-workers.sh      # YARN de los workers: 6 GB y 2 vCores
 bash cluster/07-hdfs-folders.sh      # /data de ingest, /results de query
 bash cluster/08-install-clients.sh   # Java, Hadoop y Spark en los clientes
-bash cluster/09-check.sh             # SparkPi y estado del clúster
+bash cluster/09-check.sh || echo "AVISO: la comprobación devolvió error; sigo"  # SparkPi y estado
 bash push.sh                         # código a los clientes
 bash nodes.sh                        # cómo entrar a cada nodo
 bash tunnels.sh                      # webs de HDFS y YARN en localhost

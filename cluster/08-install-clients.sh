@@ -8,13 +8,13 @@ echo "== 8. Instalar los clientes"
 # configuración de Hadoop (dónde están HDFS y YARN)
 on_master "HADOOP=$HADOOP SPARK=$SPARK bash -s" <<'EOF2'
 conf=~/$HADOOP/etc/hadoop
-ssh hadoop-client-ingest "test -f $SPARK.tgz" || scp -q ~/$HADOOP.tar.gz ~/$SPARK.tgz $conf/core-site.xml $conf/yarn-site.xml hadoop-client-ingest:
-ssh hadoop-client-query "test -f $SPARK.tgz" || scp -q ~/$HADOOP.tar.gz ~/$SPARK.tgz $conf/core-site.xml $conf/yarn-site.xml hadoop-client-query:
+ssh -n hadoop-client-ingest "test -f $SPARK.tgz" || scp -q ~/$HADOOP.tar.gz ~/$SPARK.tgz $conf/core-site.xml $conf/yarn-site.xml hadoop-client-ingest:
+ssh -n hadoop-client-query "test -f $SPARK.tgz" || scp -q ~/$HADOOP.tar.gz ~/$SPARK.tgz $conf/core-site.xml $conf/yarn-site.xml hadoop-client-query:
 EOF2
 
 install_client() {
   on_client $1 "ROLE=$1 HADOOP=$HADOOP SPARK=$SPARK bash -s" <<'EOF2'
-if [ -x ~/$SPARK/bin/spark-submit ]; then
+if [ -x ~/$SPARK/bin/spark-submit ] && grep -q SPARK_HOME ~/.bashrc; then
   echo "hadoop-client-$ROLE: ya instalado"
   exit 0
 fi

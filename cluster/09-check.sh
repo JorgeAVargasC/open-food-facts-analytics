@@ -14,7 +14,7 @@ on_master "HADOOP=$HADOOP bash -s" <<'EOF2'
 export JAVA_HOME=/usr/lib/jvm/java
 hdfs=~/$HADOOP/bin/hdfs
 for node in hadoop-master hadoop-worker-1 hadoop-worker-2 hadoop-worker-3; do
-  echo "$node: $(ssh $node /usr/lib/jvm/java/bin/jps | grep -v Jps | awk '{print $2}' | xargs)"
+  echo "$node: $(ssh -n $node /usr/lib/jvm/java/bin/jps | grep -v Jps | awk '{print $2}' | xargs)"
 done
 echo "Esperado: master con NameNode y ResourceManager; workers con DataNode y NodeManager"
 echo

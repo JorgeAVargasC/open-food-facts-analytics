@@ -174,9 +174,7 @@ Las preguntas leen ~119 MB de Parquet: buena parte de esos ~40 s es el arranque 
 <summary>Capturas del despliegue</summary>
 
 ![~/.aws/credentials](docs/assets/aws-credentials-file.png)
-![Credenciales pegadas con nano](docs/assets/aws-credentials-nano.png)
 ![Ansible creando el master](docs/assets/up-ansible-running.png)
-![Master y workers tras Ansible](docs/assets/ec2-instances-ansible.png)
 ![Las 6 instancias en EC2](docs/assets/ec2-six-instances-running.png)
 ![hdfs dfs -ls -h /data/raw](docs/assets/hdfs-ls-data-raw.png)
 ![Web de HDFS: /data/raw](docs/assets/hdfs-web-data-raw.png)
